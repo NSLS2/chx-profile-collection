@@ -70,8 +70,7 @@ class Tpx3Files(Device):
         # TODO also do the images
         
         self._res_uid = res_uid = new_short_uid()
-        #write_path_template = 'file:/nsls2/data/chx/legacy/data/%Y/%m/%d/'
-        write_path_template = f"file:/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/timepix-1/%Y/%m/%d/"
+        write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"    # Possibly need "file:/" as the prefix
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
@@ -127,7 +126,7 @@ class Tpx3HDF(Device):
     
     def stage(self):
          self.hdf5_create_directory.set(-4)
-         write_path_template = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/TPX3/%Y/%m/%d/"
+         write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"
          write_path = datetime.now().strftime(write_path_template)
          self.hdf5_file_path.put(write_path)
 
@@ -158,7 +157,7 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
     
     # def stage(self):
     #     self.hdf5_create_directory.set(-4).wait()
-    #     write_path_template = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/TimePix3/%Y/%m/%d/"
+    #     write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"
     #     write_path = datetime.now().strftime(write_path_template)
     #     self.hdf5_file_path.set(write_path).wait()
     #     self.files.stage()
