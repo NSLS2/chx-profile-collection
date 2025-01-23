@@ -67,8 +67,10 @@ def trans_tf_to_td(tf, dtype = 'dframe'):
        td.type dframe: a dataframe
        td.type list,   a list
     ''' 
-    if dtype is 'dframe':ind = tf.index
-    else:ind = range(len(tf))    
+    if dtype == 'dframe':
+        ind = tf.index
+    else:
+        ind = range(len(tf))    
     td = np.array([ datetime.datetime.fromtimestamp(tf[i]) for i in ind ])
     return td
 

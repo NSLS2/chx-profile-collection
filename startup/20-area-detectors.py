@@ -272,8 +272,8 @@ class EigerBase(AreaDetector):
     """
     num_triggers = ADComponent(EpicsSignalWithRBV, 'cam1:NumTriggers')
     file = Cpt(EigerSimulatedFilePlugin, suffix='cam1:',
-               write_path_template='/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/',
-               root='/nsls2/data/chx/assets/eiger1m/')
+               write_path_template='',
+               root='')
     beam_center_x = ADComponent(EpicsSignalWithRBV, 'cam1:BeamX')
     beam_center_y = ADComponent(EpicsSignalWithRBV, 'cam1:BeamY')
     wavelength = ADComponent(EpicsSignalWithRBV, 'cam1:Wavelength')
@@ -598,41 +598,19 @@ OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='oavcam-1')  # beamline O
 #OAV.stage_sigs[OAV.cam.trigger_mode] = 'Off'
 BCam =  StandardPointGreyV33('XF:11IDB-ES{BFLY-Cam:1}', name='zoomcam-1')
 
-
 xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye-1')
-# xray_eye1_writing.tiff.write_path_template = assets_path + f'{xray_eye1_writing.name}/%Y/%m/%d/'
-# xray_eye1_writing.tiff.read_path_template = assets_path + f'{xray_eye1_writing.name}/%Y/%m/%d/'
-# xray_eye1_writing.tiff.reg_root = assets_path + f'{xray_eye1_writing.name}'
 
 xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye-2')
-# xray_eye2_writing.tiff.write_path_template = assets_path + f'{xray_eye2_writing.name}/%Y/%m/%d/'
-# xray_eye2_writing.tiff.read_path_template = assets_path + f'{xray_eye2_writing.name}/%Y/%m/%d/'
-# xray_eye2_writing.tiff.reg_root = assets_path + f'{xray_eye2_writing.name}'
 
 xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye-3')
-# xray_eye3_writing.tiff.write_path_template = assets_path + f'{xray_eye3_writing.name}/%Y/%m/%d/'
-# xray_eye3_writing.tiff.read_path_template = assets_path + f'{xray_eye3_writing.name}/%Y/%m/%d/'
-# xray_eye3_writing.tiff.reg_root = assets_path + f'{xray_eye3_writing.name}'
 
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye-4')
-# xray_eye4_writing.tiff.write_path_template = assets_path + f'{xray_eye4_writing.name}/%Y/%m/%d/'
-# xray_eye4_writing.tiff.read_path_template = assets_path + f'{xray_eye4_writing.name}/%Y/%m/%d/'
-# xray_eye4_writing.tiff.reg_root = assets_path + f'{xray_eye4_writing.name}'
 
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='oavcam-1')   # beamline OAV using prosilica camera
-# OAV_writing.tiff.write_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
-# OAV_writing.tiff.read_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
-# OAV_writing.tiff.reg_root = assets_path + f'{OAV_writing.name}'
 
 #OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2') # printer OAV using Grasshoper UBS3 camera
-#OAV_writing.tiff.write_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
-#OAV_writing.tiff.read_path_template = assets_path + f'{OAV_writing.name}/%Y/%m/%d/'
-#OAV_writing.tiff.reg_root = assets_path + f'{OAV_writing.name}'
 
 BCam_writing =  StandardPointGreyWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='zoomcam-1')
-# BCam_writing.tiff.write_path_template = assets_path + f'{BCam_writing.name}/%Y/%m/%d/'
-# BCam_writing.tiff.read_path_template = assets_path + f'{BCam_writing.name}/%Y/%m/%d/'
-# BCam_writing.tiff.reg_root = assets_path + f'{BCam_writing.name}'
 
 fs1 = StandardProsilicaV33('XF:11IDA-BI{FS:1-Cam:1}', name='fs1')
 fs2 = StandardProsilicaV33('XF:11IDA-BI{FS:2-Cam:1}', name='fs2')
@@ -752,8 +730,6 @@ try:
     set_eiger_defaults(eiger500k_single)
     # AD v3.3+ config:
     eiger500k_single.cam.ensure_nonblocking()
-    # eiger500k_single.file.write_path_template = assets_path + f'{eiger500k_single.name}/%Y/%m/%d/'
-    # eiger500k_single.file.reg_root =assets_path + f'{eiger500k_single.name}'
 except Exception:
     print('eiger500k not configured...')
     raise
@@ -764,8 +740,6 @@ eiger1m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig1M}', # Not test
 set_eiger_defaults(eiger1m_single)
 # AD v3.3+ config:
 eiger1m_single.cam.ensure_nonblocking()
-# eiger1m_single.file.write_path_template = assets_path + f'{eiger1m_single.name}/%Y/%m/%d/'
-# eiger1m_single.file.reg_root =assets_path + f'{eiger1m_single.name}'
 
 
 # Eiger 4M using internal trigger
@@ -774,29 +748,21 @@ eiger4m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig4M}',
 set_eiger_defaults(eiger4m_single)
 # AD v3.3+ config:
 eiger4m_single.cam.ensure_nonblocking()
-# eiger4m_single.file.write_path_template = assets_path + f'{eiger4m_single.name}/%Y/%m/%d/'
-# eiger4m_single.file.reg_root =assets_path + f'{eiger4m_single.name}'
 
 try:
     # Eiger 500K using fast trigger assembly
     eiger500k = EigerFastTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k-1')
     set_eiger_defaults(eiger500k)
-    # eiger500k.file.write_path_template = assets_path + f'{eiger500k.name}/%Y/%m/%d/'
-    # eiger500k.file.reg_root =assets_path + f'{eiger500k.name}'
 except Exception:
     print('eiger500k not configured...')
 
 # Eiger 1M using fast trigger assembly
 eiger1m = EigerFastTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m-1')
 set_eiger_defaults(eiger1m)
-# eiger1m.file.write_path_template = assets_path + f'{eiger1m.name}/%Y/%m/%d/'
-# eiger1m.file.reg_root =assets_path + f'{eiger1m.name}'
 
 # Eiger 4M using fast trigger assembly
 eiger4m = EigerFastTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m-1')
 set_eiger_defaults(eiger4m)
-# eiger4m.file.write_path_template = assets_path + f'{eiger4m.name}/%Y/%m/%d/'
-# eiger4m.file.reg_root =assets_path + f'{eiger4m.name}'
 
 # setup manual eiger for 1d scans
 # prototype
@@ -805,21 +771,13 @@ set_eiger_defaults(eiger4m)
 # (only one key name should be used)
 eiger4m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m-1')
 set_eiger_defaults(eiger4m_manual)
-# eiger4m_manual.file.write_path_template = assets_path + f'{eiger4m_manual.name}/%Y/%m/%d/'
-# eiger4m_manual.file.reg_root =assets_path + f'{eiger4m_manual.name}'
 
 eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m-1')
 set_eiger_defaults(eiger1m_manual)
-# eiger1m_manual.file.write_path_template = assets_path + f'{eiger1m_manual.name}/%Y/%m/%d/'
-# eiger1m_manual.file.reg_root =assets_path + f'{eiger1m_manual.name}'
-#eiger1m_manual.file.write_path_template = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/eiger1m/%Y/%m/%d/"
-#eiger1m_manual.file.reg_root = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/eiger1m"
 
 try:
     eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k-1')
     set_eiger_defaults(eiger500k_manual)
-    # eiger500k_manual.file.write_path_template = assets_path + f'{eiger500k_manual.name}/%Y/%m/%d/'
-    # eiger500k_manual.file.reg_root =assets_path + f'{eiger500k_manual.name}'
 except Exception:
     print('eiger500k not configured...')
 
