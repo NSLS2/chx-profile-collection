@@ -70,7 +70,7 @@ class Tpx3Files(Device):
         # TODO also do the images
         
         self._res_uid = res_uid = new_short_uid()
-        write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"    # Possibly need "file:/" as the prefix
+        write_path_template = "file:" + assets_path() + "timepix-1/%Y/%m/%d/"
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
