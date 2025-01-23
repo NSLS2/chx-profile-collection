@@ -154,11 +154,17 @@ class Pilatus800V33(PilatusV33):
         write_path_template="",
         root="",
     )
+
+    def stage(self, *args, **kwargs):
+        self.file.write_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
+        self.file.reg_root = assets_path() + f'{self.name}'
+        return super().stage(*args, **kwargs)
+
 Pilatus800_on = True
 if Pilatus800_on == True:
     pilatus800 = Pilatus800V33("XF:11IDB-ES{Det:P800k}", name="pilatus800")
-    pilatus800.file.write_path_template = assets_path + f'{pilatus800.name}/%Y/%m/%d/'
-    pilatus800.file.reg_root =assets_path + f'{pilatus800.name}'
+    # pilatus800.file.write_path_template = assets_path() + f'{pilatus800.name}/%Y/%m/%d/'
+    # pilatus800.file.reg_root = assets_path() + f'{pilatus800.name}'
     pilatus800.tiff.read_attrs = []
     pilatus800.stats1.total.kind = "hinted"
     #pilatus800.stats3.total.kind = "hinted"
