@@ -49,4 +49,5 @@ plt.rcParams['figure.dpi']=200
 RE.md = RedisJSONDict(redis.Redis("info.chx.nsls2.bnl.gov"), prefix="")
 
 # Setup the path to the secure assets folder for the current proposal
-assets_path = f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/"
+def assets_path():
+    return f"/nsls2/data/chx/proposals/{RE.md['cycle']}/{RE.md['data_session']}/assets/"
