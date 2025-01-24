@@ -21,3 +21,6 @@ from chxtools.bpm_stability import bpm_read
 from chxtools import transfuncs as trans  
 from chxtools import bpm_stability as bpmst
 
+import sys
+sys.path.insert(0,'/nsls2/data2/chx/shared/CHX_Software/packages/pass_dict')
+from pass_database import *

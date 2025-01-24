@@ -936,7 +936,7 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
             #        #for d in range(len(h.start['plan_args']['detectors'])):
             #        if detector.name in list(h.devices()): scan_add=l+1
             #uid_add=tiled_reading_client[-scan_add]['start']['uid']
-            uid_add=tiled_reading_client[-1]['start']['uid']
+            uid_add=tiled_reading_client[-1].start['uid']
             uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
             uid_list.append(uid_add)          
             data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})

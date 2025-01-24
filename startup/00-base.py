@@ -38,7 +38,7 @@ nslsii.configure_base(get_ipython().user_ns,
                publish_documents_with_kafka=True)
 
 print("Initializing Tiled reading client...\nMake sure you check for duo push.")
-tiled_reading_client = from_profile("nsls2", username=None)["chx"]["raw"]
+tiled_reading_client = from_profile("nsls2", username=None, include_data_sources=True)["chx"]["raw"]
 
 db = Broker(tiled_reading_client)
 
