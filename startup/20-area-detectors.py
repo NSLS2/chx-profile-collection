@@ -24,6 +24,25 @@ from collections import OrderedDict
 
 from nslsii.ad33 import SingleTriggerV33, StatsPluginV33, CamV33Mixin
 
+
+# Define a mapping between the name of a detector and a folder to which to write the data
+# Needed for back-compatibility with old scripts using detector names different from the folder names
+name_dir_mapping = {
+        'xray_eye1': 'xray_eye-1',
+        'xray_eye2': 'xray_eye-2',
+        'xray_eye3': 'xray_eye-3',
+        'xray_eye4': 'xray_eye-4',
+        'OAV': 'oavcam-1',
+        'BCam' : 'zoomcam-1',
+        'eiger500k': 'eiger500k-1',
+        'eiger500K_single': 'eiger500k-1',
+        'eiger500k_single': 'eiger500k-1',
+        'eiger1m': 'eiger1m-1',
+        'eiger1m_single': 'eiger1m-1',
+        'eiger4m': 'eiger4m-1',
+        'eiger4m_single': 'eiger4m-1',
+    }
+
 class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
     """Add this as a component to detectors that write TIFFs."""
     ## LUTZ THIS MAY BE BROKEN NUKE IF XRAY EYES DO NOT WORK
@@ -133,9 +152,9 @@ class StandardProsilicaWithTIFF(StandardProsilica):
                root='')
     
     def stage(self, *args, **kwargs):
-        self.tiff.write_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.tiff.read_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.tiff.reg_root = assets_path() + f'{self.name}'
+        self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.read_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return super().stage(*args, **kwargs)
 
 class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
@@ -145,9 +164,9 @@ class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
                root='')
     
     def stage(self, *args, **kwargs):
-        self.tiff.write_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.tiff.read_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.tiff.reg_root = assets_path() + f'{self.name}'
+        self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.read_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return super().stage(*args, **kwargs)
 
 
@@ -203,9 +222,9 @@ class StandardPointGreyWithTIFFV33(StandardPointGreyV33):
                root='')
     
     def stage(self, *args, **kwargs):
-        self.tiff.write_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.tiff.read_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.tiff.reg_root = assets_path() + f'{self.name}'
+        self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.read_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return super().stage(*args, **kwargs)
 
 
@@ -304,8 +323,8 @@ class EigerBase(AreaDetector):
         ret = super().stage(*args, **kwargs)
         # after parent
         self.manual_trigger.set(1).wait()
-        self.file.write_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.file.reg_root = assets_path() + f'{self.name}'
+        self.file.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.file.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return ret
 
     def unstage(self):
@@ -423,8 +442,8 @@ class EigerSingleTrigger_AD37(SingleTrigger, EigerBaseV33):
         self.stage_sigs.update({'num_triggers': 1})
 
     def stage(self, *args, **kwargs):
-        self.file.write_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.file.reg_root = assets_path() + f'{self.name}'
+        self.file.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.file.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return super().stage(*args, **kwargs)
 
     def trigger(self, *args, **kwargs):
@@ -589,28 +608,28 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
 # test_trig4M = FastShutterTrigger('XF:11IDB-ES{Trigger:Eig4M}', name='test_trig4M')
 
 ## This renaming should be reversed: no correspondance between CSS screens, PV names and ophyd....
-xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye-1')
-xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye-2')
-xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye-3')
-xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye-4')
-OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='oavcam-1')  # beamline OAV using prosilica camera
+xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
+xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
+xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
+OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
 #OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2')  # printer OAV using Grasshoper UBS3 camera
 #OAV.stage_sigs[OAV.cam.trigger_mode] = 'Off'
-BCam =  StandardPointGreyV33('XF:11IDB-ES{BFLY-Cam:1}', name='zoomcam-1')
+BCam =  StandardPointGreyV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
 
-xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye-1')
+xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
 
-xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye-2')
+xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 
-xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye-3')
+xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
 
-xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye-4')
+xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 
-OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='oavcam-1')   # beamline OAV using prosilica camera
+OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
 
 #OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2') # printer OAV using Grasshoper UBS3 camera
 
-BCam_writing =  StandardPointGreyWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='zoomcam-1')
+BCam_writing =  StandardPointGreyWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
 
 fs1 = StandardProsilicaV33('XF:11IDA-BI{FS:1-Cam:1}', name='fs1')
 fs2 = StandardProsilicaV33('XF:11IDA-BI{FS:2-Cam:1}', name='fs2')
@@ -726,7 +745,7 @@ def enable_plugins(det, plugin_names):
 
 try:
     # Eiger 500k using internal trigger
-    eiger500k_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig500K}', name='eiger500k-1')
+    eiger500k_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig500K}', name='eiger500K_single')
     set_eiger_defaults(eiger500k_single)
     # AD v3.3+ config:
     eiger500k_single.cam.ensure_nonblocking()
@@ -736,7 +755,7 @@ except Exception:
 
 # Eiger 1M using internal trigger
 eiger1m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig1M}', # Not test. Paths are not defined originally
-                                    name='eiger1m-1')
+                                    name='eiger1m_single')
 set_eiger_defaults(eiger1m_single)
 # AD v3.3+ config:
 eiger1m_single.cam.ensure_nonblocking()
@@ -744,24 +763,24 @@ eiger1m_single.cam.ensure_nonblocking()
 
 # Eiger 4M using internal trigger
 eiger4m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig4M}',
-                                    name='eiger4m-1')
+                                    name='eiger4m_single')
 set_eiger_defaults(eiger4m_single)
 # AD v3.3+ config:
 eiger4m_single.cam.ensure_nonblocking()
 
 try:
     # Eiger 500K using fast trigger assembly
-    eiger500k = EigerFastTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k-1')
+    eiger500k = EigerFastTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k')
     set_eiger_defaults(eiger500k)
 except Exception:
     print('eiger500k not configured...')
 
 # Eiger 1M using fast trigger assembly
-eiger1m = EigerFastTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m-1')
+eiger1m = EigerFastTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m')
 set_eiger_defaults(eiger1m)
 
 # Eiger 4M using fast trigger assembly
-eiger4m = EigerFastTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m-1')
+eiger4m = EigerFastTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m')
 set_eiger_defaults(eiger4m)
 
 # setup manual eiger for 1d scans
@@ -769,14 +788,14 @@ set_eiger_defaults(eiger4m)
 # trick: keep same epics name. This is fine
 # if there are colliding keys, then we're doing something wrong
 # (only one key name should be used)
-eiger4m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m-1')
+eiger4m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m_single')
 set_eiger_defaults(eiger4m_manual)
 
-eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m-1')
+eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m_single')
 set_eiger_defaults(eiger1m_manual)
 
 try:
-    eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k-1')
+    eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k_single')
     set_eiger_defaults(eiger500k_manual)
 except Exception:
     print('eiger500k not configured...')
