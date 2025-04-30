@@ -122,9 +122,9 @@ class Pilatus800V33(SingleTriggerV33, PilatusDetector):
     tiff = Cpt(
         TIFFPluginWithFileStore,
         suffix="TIFF1:",
-        read_path_template="/nsls2/data/chx/legacy/data/%Y/%m/%d/",
-        write_path_template="/nsls2/data/chx/legacy/data/%Y/%m/%d/",
-        root="/nsls2/data/chx/legacy/data",
+        read_path_template="",
+        write_path_template="",
+        root="",
     )
     # root='/')
 
@@ -151,9 +151,15 @@ class Pilatus800V33(PilatusV33):
     tiff = Cpt(
         TIFFPluginWithFileStore,
         suffix="TIFF1:",
-        write_path_template="/nsls2/data/chx/legacy/data/%Y/%m/%d/",
-        root="/nsls2/data/chx/legacy/data",
+        write_path_template="",
+        root="",
     )
+
+    def stage(self, *args, **kwargs):
+        self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
+        return super().stage(*args, **kwargs)
+
 Pilatus800_on = True
 if Pilatus800_on == True:
     pilatus800 = Pilatus800V33("XF:11IDB-ES{Det:P800k}", name="pilatus800")

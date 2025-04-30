@@ -1,3 +1,22 @@
+def lock_axis(axis, verbose = False):
+    """
+    axis: single axis (e.g. diff.xh) or device (e.g. diff)
+    gets current readback_value and sets limits +/- .005 from this value
+    """
+    RBV = axis.user_readback.value
+    axis.high_limit_travel.set(RBV+.005)
+    axis.low_limit_travel.set(RBV-.005)
+    if verbose:
+        print('set soft limits for %s: [%s,%s]'%(axis.name,np.round(RBV-.005,4),np.round(RBV+.005,4)))
+
+
+def lock_device(device, verbose=False):
+        device_dict = {'diff':[diff.Del,diff.gam,diff.om,diff.phi,diff.xb,diff.yb,diff.chh,diff.thh,diff.phh,diff.xh,diff.yh,diff.zh,diff.chv,diff.phv,diff.xv,diff.yv,diff.zv,diff.xv2]
+                      }
+        for d in device_dict[device]:
+            lock_axis(d,verbose=verbose)
+
+
 def set_lm(motor,lowlimit,highlimit,verbose=False):
     """
     set limits on a single axis
@@ -15,37 +34,3 @@ def set_lm(motor,lowlimit,highlimit,verbose=False):
     except:
         print('WARNING: setting lmits for %s failed!!!!'%motor)
 
-
-def lock_axis(axis, tol=.1,verbose=False):
-    """
-    'locks' an axis like e.g. 'diff.xh'  by setting upper and lower limits just around current axes positions
-    axis: str, e.g. 'diff.xh'
-    tol: float, tolerance of limits, e.g. if tol=.1 limits will be set to +/-.1 (in axis units) around current position 
-    """
-    try:
-        cur_pos = eval('%s'%axis+'.user_readback.value')
-        if verbose:
-            print('current position of %s: %s -> limits will be set to [%s, %s]'%(axis,cur_pos,cur_pos-tol,cur_pos+tol))
-        set_lm(axis,cur_pos-tol,cur_pos+tol,verbose=verbose)
-    except:
-        print('WARNING: locking %s failed!!!!'%axis)
-
-
-def lock_device(device,tol=.1,verbose=True):
-    """
-    'locks' a device like e.g. 'diff' (diffractometer) by setting upper and lower limits just around current axes positions
-    device: str, e.g. 'diff'
-    tol: float, tolerance of limits, e.g. if tol=.1 limits will be set to +/-.1 (in axis units) around current position 
-    """
-    # check if device is ineed a device:
-    assert '__main__' in str(type(eval(device))), "ERROR: %s does NOT seem to be a device (class)...use lock_axis to lock individual motors."
-    # get list of individial axes
-    ra=eval('%s'%device+'.read_attrs')
-    ax_list = []
-    for r in ra:
-        if '.' not in r:
-            ax_list.append(str(r))
-    for a in ax_list:
-        lock_axis('%s.%s'%(device,a))
-    if verbose:
-        print('successfully locked axes %s of device %s'%(ax_list,device) )

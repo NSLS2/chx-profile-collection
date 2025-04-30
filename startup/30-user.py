@@ -9,6 +9,7 @@ from bluesky import RunEngine
 from bluesky.utils import ProgressBarManager
 from bluesky.plan_stubs import rd
 from matplotlib import cm
+from termcolor import colored
 
 def set_bpm(gain='1uA'):
     """
@@ -39,6 +40,29 @@ def set_bpm(gain='1uA'):
 def md_reset(  ):
     sid = RE.md['scan_id']
     RE.md.update({'beamline_id': 'CHX', 'scan_id': sid, 'user': 'CHX', 'run': '2018-3', 'owner': 'CHX', 'sample': 'N.A.'})
+
+def update_metadata(uid,update_dict,verbose=False):
+    """
+    update metadata in start documment using .patch_metadata from Juan
+    uid: uid or scan_id to be updated
+    update_dict: key value pairs to update, if key alreay exists, value will be updated, otherwise key-value pair will be added
+    
+    EXAMPLE: update_metadata(123456,{'weather':'rainy','mood':'moody'},verbose=True)
+    """
+    exclude_list = ['uid','scan_id', 'time'] # we should not overwrite these
+    h=db[uid].v2
+    for k in update_dict.keys():
+        action=None
+        if k in exclude_list:
+            print(colored('SORRY: we cannot overwrite metadata for %s'%k,'red'))
+        elif k in list(h.start.keys()):
+                action = "replace"; action_='replaced '; detail='%s: %s -> %s'%(k,h.start[k],update_dict[k])
+        else:
+            action = "add"; action_='added '; detail='%s : %s'%(k,update_dict[k])
+        if action is not None:
+            h.patch_metadata([{"op":action,"path":"/start/%s"%k,"value":"%s"%(update_dict[k])}])
+            if verbose:
+                print(colored('%s: '%action_,'green')+colored('%s'%detail,'yellow')) 
     
 
 def get_beam_center_update( uid = -1, threshold = 200  ):
@@ -51,11 +75,11 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
         None
     
     '''
-    hdr = db[uid]
+    hdr = tiled_reading_client[uid]
     keys = [k for k, v in hdr.descriptors[0]['data_keys'].items()     if 'external' in v]
     det = keys[0]    
     print('The detector is %s.'%det)
-    imgs = list(db[uid].data(det))[0]
+    imgs = list(tiled_reading_client[uid].data(det))[0]
     if det =='eiger1m_single_image':
         Chip_Mask=np.load( '/XF11ID/analysis/2017_1/masks/Eiger1M_Chip_Mask.npy')
         img = imgs[0]
@@ -730,7 +754,7 @@ def DBPM_feedback(chan_A=True,chan_B=True,xtol=.3,ytol=.3,max_retry=3,stop_on_er
 
 
 
-def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comment='', feedback_on=False, PV_trigger=False, position_trigger=False ,analysis='', use_xbpm=False, OAV_mode='none',auto_compression=False,md_import={},auto_beam_position=True):
+def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comment='AUTO_COMMENT', feedback_on=False, auto_trigger=True ,analysis='', use_xbpm=False, OAV_mode='none',auto_compression=False,md_import={},auto_beam_position=True,return_uid=False,show_images=True):
     """
     det='eiger1m' / 'eiger4m' / 'eiger500k'
     shutter_mode='single' / 'multi'
@@ -750,27 +774,14 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     10/27/2018: added option to add acquired uid to list for automatic compression:
     auto_compression=False/True, True: add uid to document "general list" in collection "data_acquisition_collection" in database 'samples'
     database access is done in a 'try', to avoid errors in case of problems with database access
-    06/03/2019: added trigger via external PV or motor position, with pre-staging of detectors
-    PV_trigger = False -> previous behavior, PV_trigger = True: write metadata, stage detector(s), wait for PV trigger signal
-    position_trigger = False -> previous behavior
-    position_trigger={'motor':diff.xh,'target':-.2,'threshold':.1,'start_move':False} -> trigger when motor position within threshold,
-    start_move=False -> don't move motor from series, start_move=True: move motor from series
+    02/27/2025 replaced PV_trigger and position_trigger by auto_trigger:
+    auto_trigger = True (default): data acqusition is triggered immedidately; auto_trigger = False: detector gets staged and waits for manual trigger PV to become 'high' (True/1)
+    after data acquisiton: resets Eiger staging to 'normal' mode and resets manual trigger signal to 0
     10/02/2020: collect series specific md in dictionary and use md in count to capture it; add possibility to pass md dictionary to series; 
     add auto-comment: comment='descr1'+'AUTO_COMMENT'+'descr2' -> 'descr1 expt=xxxs, imnum=yyyy, Trans= zzz sample: RE.md['sample'] descr2
     auto_beam_position: if True, updates PVs for direct beam position based on reference positions in RE.md['beam_position_dict'] and current detector position
-    """
-    # Define trigger PV (use is optional)
-    #caput('XF:11ID-CT{ES:1}bo2',1)
-    #trigger_pv='XF:11ID-CT{ES:1}bi3'
-    trigger_pv = 'XF:11ID-CT{M3}bi2' # standard, used for HD 3D printer (-m3)
-    #trigger_pv = 'XF:11IDB-ES{IO:1}DI:1-Sts'   # digitial input DI0 -> used e.g. for Linkam trigger
-    #trigger_pv='XF:11ID-CT{ES:1}bi1' 
-    #trigger_pv='XF:11IDB-ES{IO}DI:4-Sts' #linkam trigger
-    trigger_PV=EpicsSignal(trigger_pv,name='trigger_PV')
-   
-    
-    if PV_trigger and position_trigger:
-      raise series_Exception('error: Cannot trigger both at PV signal and motor position -> chose one!')
+    03/09/2025 added option show_images -> default:True, if False: sets Data Source in AD to 'None', which means none of the images being collected are shown in AD => significantly reduces the 'dead time' after taking a fast series with many images
+    """   
     
     print('start of series: '+time.ctime())
     
@@ -818,7 +829,13 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
 
         detector.cam.acquire_time.value=expt       # setting up exposure for eiger500k/1m/4m_single
         detector.cam.acquire_period.value=acqp
-        detector.cam.num_images.value=imnum
+        #detector.cam.num_images.value=imnum
+        detector.cam.num_images.set(imnum).wait()
+        detector.auto_trigger=auto_trigger
+        if not show_images:
+            detector.stream_enable.set(0).wait()
+            detector.data_source.set(0).wait()
+        
         
     else:
         raise series_Exception('error: this macro currently only supports single shutter mode')
@@ -843,7 +860,7 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     #md_series={'exposure time':str(expt), 'acquire period':str(acqp),'shutter mode':shutter_mode,'number of images':str(imnum),'data path':idpath,'sequence id':str(seqid),
                   #'transmission':transmission,'OAV_mode':OAV_mode,'T_yoke':T_yoke,'T_sample':T_sample,'analysis':analysis,'feedback_x':fx,'feedback_y':fy}
     #Xiao added 'T_sample_stinger'
-    md_series={'XPCS_data':True,'exposure time':str(expt), 'acquire period':str(acqp),'shutter mode':shutter_mode,'number of images':str(imnum),'data path':idpath,'sequence id':str(seqid),
+    md_series={'XPCS_data':True,'exposure time':str(expt), 'acquire period':str(acqp),'shutter mode':shutter_mode,'number of images':str(imnum),'data path':idpath,'sequence id':str(seqid),'auto_trigger':str(auto_trigger),
                   'transmission':transmission,'OAV_mode':OAV_mode,'T_yoke':T_yoke,'T_sample':T_sample,'T_sample_stinger':T_sample_stinger,'analysis':analysis,'feedback_x':fx,'feedback_y':fy}
 
     ## end series specific metadata
@@ -884,39 +901,35 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
         org_acqt = OAV.cam.acquire_time.get()
     
     if OAV_mode == 'single':
-        OAV.cam.num_images.put(2,wait=True) ## if switching on light, first image will be dark
+        OAV.cam.num_images.set(2).wait() ## if switching on light, first image will be dark
     if OAV_mode == 'start_end': 
         pt=(acqp)*imnum #period between two images to span Eiger series (exposure time for OAV image neglected)
-        OAV.cam.num_images.put(2,wait=True)
+        OAV.cam.num_images.set(2).wait()
         OAV.cam.acquire_period.put(pt,wait=True)
     if OAV_mode == 'movie_max':
         OAV.cam.acquire_period.put(OAV.cam.acquire_time.get(),wait=True)
     if OAV_mode == 'movie' or OAV_mode == 'movie_max':
         ni=acqp*imnum/OAV.cam.acquire_period.get()
         ni=ni-ni*.2
-        OAV.cam.num_images.put(np.ceil(ni),wait=True)
+        OAV.cam.num_images.set(np.ceil(ni)).wait()
         
     if use_xbpm:
         caput( 'XF:11IDB-BI{XBPM:02}FaSoftTrig-SP',1,wait=True) #yugang add at Sep 13, 2017 for test fast shutter by using xbpm
         print('Use XBPM to monitor beam intensity.')
 
-    if PV_trigger:
-      dets = detlist     
-      #RE(wait_for_pv(dets,trigger_PV,feedback_on=feedback_on,md=md_import),Measurement=total_comment)
-      print('md dictionary: %s'%md_import)
-      RE(wait_for_pv(dets,trigger_PV,feedback_on=feedback_on,md=md_import),Measurement=total_comment)
-    elif position_trigger:
-      dets = detlist     
-      #RE(wait_for_motor(dets, position_trigger['motor'], position_trigger['target'], position_trigger['threshold'],start_move=position_trigger['start_move'], feedback_on=feedback_on, md=md_import),Measurement=total_comment) 
-      RE(wait_for_motor(dets, position_trigger['motor'], position_trigger['target'], position_trigger['threshold'],start_move=position_trigger['start_move'], md=md_import),Measurement=total_comment) 
-
-    else:
-      if feedback_on:
-        #RE(prep_series_feedback()) -> OLD FAST SHUTTER UPSTREAM OF DBPM
+    if feedback_on:
         if (not bpm2_feedback_selector_a.get()) or (not bpm2_feedback_selector_b.get()): # feedback isn't already running
             DBPM_feedback(chan_A=True,chan_B=True,xtol=.3,ytol=.3,max_retry=3,stop_on_error=False,check_PID_loop=False,open_shutters=False,verbose=False)
-      RE(count(detlist,md=md_import),Measurement=total_comment)  ### TAKING DATA
-    
+    ###############################################################################################
+    if not auto_trigger:
+        print('Going to wait for manual trigger signal...')
+    uid_add, = RE(count(detlist,md=md_import),Measurement=total_comment)  ### TAKING DATA
+    if not auto_trigger: # reset to default behavior and reset the manual trigger singal
+        detector.auto_trigger=True
+        detector.special_trigger_button.set(0)
+    if not show_images: # reset to default behavior: AD showing images
+            detector.data_source.set(2).wait()
+    ###############################################################################################
     # setting image number and period back for OAV camera:
     if OAV_mode != 'none':    
         OAV.cam.num_images.set(org_ni)
@@ -929,14 +942,6 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
     ####### add acquired uid to database list for automatic compression #########
     if auto_compression:
         try:
-            #scan_add = None
-            #for l in range(10): # with multithreading, other uids might have completed before this one, e.g. with Pilatus 800k WAXS detector -> need to find last uid that uses same detector as this series
-            #    if scan_add is None:
-            #        h=db[-(l+1)]
-            #        #for d in range(len(h.start['plan_args']['detectors'])):
-            #        if detector.name in list(h.devices()): scan_add=l+1
-            #uid_add=db[-scan_add]['start']['uid']
-            uid_add=db[-1]['start']['uid']
             uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
             uid_list.append(uid_add)          
             data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})
@@ -948,6 +953,8 @@ def series(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,comme
                 print('Sorry, failed to add uid to list for automatic compression!')
     else:
         print('uid not added to database for automatic compression')
+    if return_uid:
+        return uid_add
     ############################################################################### THE END #########################
 
 
@@ -956,10 +963,10 @@ def check_uid():
     for l in range(10): # with multithreading, other uids might have completed before this one, e.g. with Pilatus 800k WAXS detector -> need to find last uid that uses same detector as this series
         print(l)
         if scan_add is None:
-            h=db[-(l+1)]
+            h=tiled_reading_client[-(l+1)]
             for d in range(len(h.start['plan_args']['detectors'])):
                 if detector.name in h.start['plan_args']['detectors'][d]: scan_add=l+1
-    uid_add=db[-scan_add]['start']['uid']   
+    uid_add=tiled_reading_client[-scan_add]['start']['uid']   
 
     
     
@@ -1217,7 +1224,7 @@ def series_old(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,c
     ####### add acquired uid to database list for automatic compression #########
     if auto_compression:
         try:
-            uid_add=db[-1]['start']['uid']
+            uid_add=tiled_reading_client[-1]['start']['uid']
             uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
             uid_list.append(uid_add)
             data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})
