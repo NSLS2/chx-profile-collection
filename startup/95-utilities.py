@@ -59,14 +59,23 @@ def backup_md(md_dict,backup_dict_path,md_filename,verbose=False):
     creates directory specified as backup_dict_path IF it does not exist
     backup_md(md_dict,backup_dict_path,md_filename,verbose=False)
     LW 02/26/2024
+    changes 03/18/2025: changed RE.md to redis, which contains non json-serializable datatypes ...and datatypes without proper implementation of type-checking...
     """
+    # convert redis_json_dict to regular dict
+    from ast import literal_eval
+    md_dict=dict(literal_eval(str(md_dict)))
     #create filename
     t=str(datetime.now(ZoneInfo("America/New_York"))) # remove one datetime for beamline...
     json_filename = backup_dict_path+md_filename+t.split()[0]+'_%s_%s_%s.json'%(t.split()[1].split(':')[0],t.split()[1].split(':')[1],t.split()[1].split(':')[2].split('.')[0])
-
+    ### need to deal with redis specific datatypes and convert them to something sensible:
+    r=str(redis.StrictRedis(md_dict))
+    md_dict = dict(literal_eval(r.split('host=')[1].split(',port')[0]))
+    
     if not os.path.exists(backup_dict_path):
         os.makedirs(backup_dict_path)
     md_dict['backup_epoch']=time.time()
+    # if 'proposal' in md_dict.keys():
+    #     del md_dict['proposal']
     with open(json_filename, "w") as outfile:
         json.dump(json.dumps(md_dict), outfile)
     if verbose:
@@ -77,7 +86,6 @@ def get_user_list(proposal_number : int):
     """Returns a list of usernames assigned to a given proposal
 
     """
-
     nslsii_api_client = httpx.Client(base_url="https://api.nsls2.bnl.gov")
     proposal_response = nslsii_api_client.get(f"/v1/proposal/{proposal_number}").raise_for_status()
     proposal_data = proposal_response.json()["proposal"]

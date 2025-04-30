@@ -41,6 +41,7 @@ name_dir_mapping = {
         'eiger1m_single': 'eiger1m-1',
         'eiger4m': 'eiger4m-1',
         'eiger4m_single': 'eiger4m-1',
+        'pilatus800': 'pilatus800k-1',
     }
 
 class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
@@ -53,6 +54,7 @@ class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
         if color_mode == 'Mono':
             ret[key]['shape'] = [
                 self.parent.cam.num_images.get(),
+                self.array_size.depth.get(),
                 self.array_size.height.get(),
                 self.array_size.width.get()
                 ]
@@ -153,7 +155,7 @@ class StandardProsilicaWithTIFF(StandardProsilica):
     
     def stage(self, *args, **kwargs):
         self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
-        self.tiff.read_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.read_path_template = () + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
         self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return super().stage(*args, **kwargs)
 
@@ -301,6 +303,8 @@ class EigerBase(AreaDetector):
     photon_energy = ADComponent(EpicsSignalWithRBV, 'cam1:PhotonEnergy')
     manual_trigger = ADComponent(EpicsSignalWithRBV, 'cam1:ManualTrigger')  # the checkbox
     special_trigger_button = ADComponent(EpicsSignal, 'cam1:Trigger')  # the button next to 'Start' and 'Stop'
+    stream_enable = ADComponent(EpicsSignal,'cam1:StreamEnable')
+    data_source = ADComponent(EpicsSignal,'cam1:DataSource') # data source like None, FileWriter, Stream
     image = Cpt(ImagePlugin, 'image1:')
     stats1 = Cpt(StatsPlugin, 'Stats1:')
     stats2 = Cpt(StatsPlugin, 'Stats2:')
@@ -437,6 +441,7 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
 class EigerSingleTrigger_AD37(SingleTrigger, EigerBaseV33):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.auto_trigger = True
         self.stage_sigs['cam.trigger_mode'] = 0
         self.stage_sigs['shutter_mode'] = 1  # 'EPICS PV'
         self.stage_sigs.update({'num_triggers': 1})
@@ -449,7 +454,8 @@ class EigerSingleTrigger_AD37(SingleTrigger, EigerBaseV33):
     def trigger(self, *args, **kwargs):
         status = super().trigger(*args, **kwargs)
         #set_and_wait(self.special_trigger_button, 1)
-        self.special_trigger_button.set(1).wait()
+        if self.auto_trigger:
+            self.special_trigger_button.set(1).wait()
         return status
 
     def read(self, *args, streaming=False, **kwargs):
@@ -613,6 +619,7 @@ xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
 xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
+#OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='OAV')  # printer OAV using Grasshoper UBS3 camera -> this worked in March 2025
 #OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2')  # printer OAV using Grasshoper UBS3 camera
 #OAV.stage_sigs[OAV.cam.trigger_mode] = 'Off'
 BCam =  StandardPointGreyV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
@@ -626,6 +633,7 @@ xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xr
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
+#OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='OAV') # printer OAV using Grasshoper UBS3 camera -> this worked in March 2024
 
 #OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2') # printer OAV using Grasshoper UBS3 camera
 
