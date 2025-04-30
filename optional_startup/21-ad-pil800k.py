@@ -156,8 +156,8 @@ class Pilatus800V33(PilatusV33):
     )
 
     def stage(self, *args, **kwargs):
-        self.file.write_path_template = assets_path() + f'{self.name}/%Y/%m/%d/'
-        self.file.reg_root = assets_path() + f'{self.name}'
+        self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return super().stage(*args, **kwargs)
 
 Pilatus800_on = True
