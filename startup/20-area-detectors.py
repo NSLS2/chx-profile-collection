@@ -150,8 +150,7 @@ class StandardProsilicaV33(SingleTriggerV33, ProsilicaDetector):
 class StandardProsilicaWithTIFF(StandardProsilica):
     tiff = Cpt(TIFFPluginWithFileStore,
                suffix='TIFF1:',
-               write_path_template='',
-               root='')
+               write_path_template='')
     
     def stage(self, *args, **kwargs):
         self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
@@ -162,8 +161,7 @@ class StandardProsilicaWithTIFF(StandardProsilica):
 class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
     tiff = Cpt(TIFFPluginWithFileStore,
                suffix='TIFF1:',
-               write_path_template='',
-               root='')
+               write_path_template='')
     
     def stage(self, *args, **kwargs):
         self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
@@ -220,8 +218,7 @@ class StandardPointGreyV33(SingleTriggerV33, PointGreyDetector):
 class StandardPointGreyWithTIFFV33(StandardPointGreyV33):
     tiff = Cpt(TIFFPluginWithFileStore,
                suffix='TIFF1:',
-               write_path_template='',
-               root='')
+               write_path_template='')
     
     def stage(self, *args, **kwargs):
         self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
@@ -293,8 +290,7 @@ class EigerBase(AreaDetector):
     """
     num_triggers = ADComponent(EpicsSignalWithRBV, 'cam1:NumTriggers')
     file = Cpt(EigerSimulatedFilePlugin, suffix='cam1:',
-               write_path_template='',
-               root='')
+               write_path_template='')
     beam_center_x = ADComponent(EpicsSignalWithRBV, 'cam1:BeamX')
     beam_center_y = ADComponent(EpicsSignalWithRBV, 'cam1:BeamY')
     wavelength = ADComponent(EpicsSignalWithRBV, 'cam1:Wavelength')

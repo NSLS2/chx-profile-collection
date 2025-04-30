@@ -33,6 +33,8 @@ ip.prompts = ProposalIDPrompt(ip)
 tiled_writing_client = from_profile("nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_CHX"])["chx"]["raw"]
 
 class TiledInserter:
+    
+    name = 'chx'
     def insert(self, name, doc):
         ATTEMPTS = 20
         error = None
@@ -54,7 +56,7 @@ tiled_inserter = TiledInserter()
 # The function below initializes RE and subscribes tiled_inserter to it
 nslsii.configure_base(get_ipython().user_ns,
                tiled_inserter,
-               publish_documents_with_kafka=True)
+               publish_documents_with_kafka=True,)
 
 print("Initializing Tiled reading client...\nMake sure you check for duo push.")
 tiled_reading_client = from_profile("nsls2", username=None, include_data_sources=True)["chx"]["raw"]
