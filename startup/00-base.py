@@ -3,7 +3,7 @@ from bluesky import RunEngine
 nslsii.configure_base(
     get_ipython().user_ns,
     'chx',
-    publish_documents_with_kafka=True
+    publish_documents_with_kafka=False
 )
 
 # from tiled.client import from_profile
