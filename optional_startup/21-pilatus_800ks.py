@@ -102,7 +102,7 @@ class PilatusV33(SingleTriggerV33, PilatusDetector):
             self.cam.acquire_time,
             exposure_time,
             self.cam.acquire_period,
-            exposure_time + 0.1,
+            exposure_time + 0.01,
         )
     def setExposurePeriod(self, exposure_period, verbosity=3):
         yield from mv(self.cam.acquire_period, exposure_period)
@@ -139,7 +139,7 @@ class Pilatus800V33(SingleTriggerV33, PilatusDetector):
             self.cam.acquire_time,
             exposure_time,
             self.cam.acquire_period,
-            exposure_time + 0.1,
+            exposure_time + 0.01,
         )
         # self.cam.acquire_time.put(exposure_time)
         # self.cam.acquire_period.put(exposure_time+.1)

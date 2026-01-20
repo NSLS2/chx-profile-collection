@@ -66,7 +66,6 @@ def insitu_printing_individualized_waxs(detector_list,sample=None, multithreadin
          spot_uid,=RE(wcount(detector_list=detector_list,imnum=[param_dict[sample]['WAXS']['post'][k][2]],exposure_time=[param_dict[sample]['WAXS']['post'][k][1]],acquire_period=['auto']),Measurement = '%s WAXS post #%s  %ss x %sfr'%(sample,kk+1,param_dict[sample]['WAXS']['post'][k][1],param_dict[sample]['WAXS']['post'][k][2]))
     RE.md['transmission_dict'].update({spot_uid:{'pos':printer.x_bed.user_readback.get()}})
     caput(WAXS_done_pv,1)
-    pil800k_shutter_mode(1)
     caput('XF:11IDB-ES{Det:P800k}cam1:NumImages',1)
     if caget(SAXS_done_pv):
         fast_sh.close()
@@ -119,7 +118,19 @@ def pil800k_shutter_mode(mode):
     caput('XF:11IDB-ES{Det:P800k}cam1:ShutterMode',mode)
 
     
-    
-    
-    
+# WAXS_acquisitions:
+# homopolymer MI35 'slow'
+# triggered_WAXS(detector_list=[pilatus800],imnum=[400],exposure_time=[.1],acquire_period=['auto'],delay=0,post_series=3, post_acquire_period=[
+#    ...: 'auto'],post_imnum=[200],post_exposure_time=[.1])
+# homopolymer MI35 'fast'
+# triggered_WAXS(detector_list=[pilatus800],imnum=[400],exposure_time=[.035],acquire_period=['auto'],delay=0,post_series=2, post_acquire_period=[
+#    ...: 'auto'],post_imnum=[200],post_exposure_time=[.1])
+# Homo+PPMA+0.5 vol% SI
+#triggered_WAXS(detector_list=[pilatus800],imnum=[800],exposure_time=[.045],acquire_period=['auto'],delay=0,post_series=2, post_acquire_perio
+#     ...: d=['auto'],post_imnum=[200],post_exposure_time=[.3])
+
+sample_string_PV='XF:11IDM-M3{IO:1}DI:5-Sts.DESC'
+def collect_waxs(expt=.1,imnum=1,comment=''):
+    RE.md['sample']=caget(sample_string_PV)
+    RE(mcount([pilatus800],exposure_time=[expt],imnum=[imnum]),Measurement='comment')
     
