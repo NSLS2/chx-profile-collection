@@ -1,3 +1,3 @@
 #!/bin/bash
 
-cp -Rv data_files ~/.ipython/profile_${TEST_PROFILE}/
+cp -Rv "${CLONED_REPO}/data_files" ~/.ipython/profile_${TEST_PROFILE}/
