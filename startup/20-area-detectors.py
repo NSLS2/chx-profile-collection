@@ -6,7 +6,7 @@ from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    ImagePlugin, StatsPlugin, DetectorBase, HDF5Plugin,
                    AreaDetector, EpicsSignal, EpicsSignalRO, ROIPlugin,
                    TransformPlugin, ProcessPlugin, Device, DeviceStatus,
-                   OverlayPlugin, ProsilicaDetectorCam)
+                   OverlayPlugin, ProsilicaDetectorCam, PointGreyDetector, PointGreyDetectorCam)
 
 from ophyd.status import StatusBase
 from ophyd.device import Staged
@@ -24,6 +24,26 @@ from collections import OrderedDict
 
 from nslsii.ad33 import SingleTriggerV33, StatsPluginV33, CamV33Mixin
 
+
+# Define a mapping between the name of a detector and a folder to which to write the data
+# Needed for back-compatibility with old scripts using detector names different from the folder names
+name_dir_mapping = {
+        'xray_eye1': 'xray_eye-1',
+        'xray_eye2': 'xray_eye-2',
+        'xray_eye3': 'xray_eye-3',
+        'xray_eye4': 'xray_eye-4',
+        'OAV': 'oavcam-1',
+        'BCam' : 'zoomcam-1',
+        'eiger500k': 'eiger500k-1',
+        'eiger500K_single': 'eiger500k-1',
+        'eiger500k_single': 'eiger500k-1',
+        'eiger1m': 'eiger1m-1',
+        'eiger1m_single': 'eiger1m-1',
+        'eiger4m': 'eiger4m-1',
+        'eiger4m_single': 'eiger4m-1',
+        'pilatus800': 'pilatus800k-1',
+    }
+
 class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
     """Add this as a component to detectors that write TIFFs."""
     ## LUTZ THIS MAY BE BROKEN NUKE IF XRAY EYES DO NOT WORK
@@ -34,6 +54,7 @@ class TIFFPluginWithFileStore(TIFFPlugin, FileStoreTIFFIterativeWrite):
         if color_mode == 'Mono':
             ret[key]['shape'] = [
                 self.parent.cam.num_images.get(),
+                self.array_size.depth.get(),
                 self.array_size.height.get(),
                 self.array_size.width.get()
                 ]
@@ -129,19 +150,87 @@ class StandardProsilicaV33(SingleTriggerV33, ProsilicaDetector):
 class StandardProsilicaWithTIFF(StandardProsilica):
     tiff = Cpt(TIFFPluginWithFileStore,
                suffix='TIFF1:',
-               write_path_template='/nsls2/data/chx/legacy/data/%Y/%m/%d/',
-               root='/nsls2/data/chx/legacy/data')
+               write_path_template='')
+    
+    def stage(self, *args, **kwargs):
+        self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.read_path_template = () + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
+        return super().stage(*args, **kwargs)
 
 class StandardProsilicaWithTIFFV33(StandardProsilicaV33):
     tiff = Cpt(TIFFPluginWithFileStore,
                suffix='TIFF1:',
-               write_path_template='/nsls2/data/chx/legacy/data/%Y/%m/%d/',
-               root='/nsls2/data/chx/legacy/data')
-               #root='/XF11ID/data')
+               write_path_template='')
+    
+    def stage(self, *args, **kwargs):
+        self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.read_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
+        return super().stage(*args, **kwargs)
+
+
+class PointGreyDetectorCamV33(PointGreyDetectorCam):
+    '''This is used to update the Standard PointGrey to AD33. It adds the
+process
+    '''
+    wait_for_plugins = Cpt(EpicsSignal, 'WaitForPlugins',
+                           string=True, kind='config')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.stage_sigs['wait_for_plugins'] = 'Yes'
+
+    def ensure_nonblocking(self):
+        self.stage_sigs['wait_for_plugins'] = 'Yes'
+        for c in self.parent.component_names:
+            cpt = getattr(self.parent, c)
+            if cpt is self:
+                continue
+            if hasattr(cpt, 'ensure_nonblocking'):
+                cpt.ensure_nonblocking()
+
+class StandardPointGreyV33(SingleTriggerV33, PointGreyDetector):
+    cam = Cpt(PointGreyDetectorCamV33, 'cam1:')
+    image = Cpt(ImagePlugin, 'image1:')
+    stats1 = Cpt(StatsPluginV33, 'Stats1:')
+    stats2 = Cpt(StatsPluginV33, 'Stats2:')
+    stats3 = Cpt(StatsPluginV33, 'Stats3:')
+    stats4 = Cpt(StatsPluginV33, 'Stats4:')
+    stats5 = Cpt(StatsPluginV33, 'Stats5:')
+    trans1 = Cpt(TransformPlugin, 'Trans1:')
+    roi1 = Cpt(ROIPlugin, 'ROI1:')
+    roi2 = Cpt(ROIPlugin, 'ROI2:')
+    roi3 = Cpt(ROIPlugin, 'ROI3:')
+    roi4 = Cpt(ROIPlugin, 'ROI4:')
+    proc1 = Cpt(ProcessPlugin, 'Proc1:')
+    over1 = Cpt(OverlayPlugin, 'Over1:')
+
+    # This class does not save TIFFs. We make it aware of the TIFF plugin
+    # only so that it can ensure that the plugin is not auto-saving.
+    tiff = Cpt(TIFFPluginEnsuredOff, suffix='TIFF1:')
+
+    @property
+    def hints(self):
+        return {'fields': [self.stats1.total.name]}
+
+
+class StandardPointGreyWithTIFFV33(StandardPointGreyV33):
+    tiff = Cpt(TIFFPluginWithFileStore,
+               suffix='TIFF1:',
+               write_path_template='')
+    
+    def stage(self, *args, **kwargs):
+        self.tiff.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.read_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.tiff.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
+        return super().stage(*args, **kwargs)
+
 
 class EigerSimulatedFilePlugin(Device, FileStoreBase):
     sequence_id = ADComponent(EpicsSignalRO, 'SequenceId')
     file_path = ADComponent(EpicsSignalWithRBV, 'FilePath', string=True)
+    create_dir_depth = ADComponent(EpicsSignalWithRBV, "CreateDirectory")
     file_write_name_pattern = ADComponent(EpicsSignalWithRBV, 'FWNamePattern',
                                           string=True)
     file_write_images_per_file = ADComponent(EpicsSignalWithRBV,
@@ -160,6 +249,7 @@ class EigerSimulatedFilePlugin(Device, FileStoreBase):
 
     def stage(self):
         res_uid = new_short_uid()
+        self.create_dir_depth.set(-4).wait()
         write_path = datetime.now().strftime(self.write_path_template)
         #set_and_wait(self.file_path, write_path + '/')
         self.file_path.set(write_path + '/').wait()
@@ -200,8 +290,7 @@ class EigerBase(AreaDetector):
     """
     num_triggers = ADComponent(EpicsSignalWithRBV, 'cam1:NumTriggers')
     file = Cpt(EigerSimulatedFilePlugin, suffix='cam1:',
-               write_path_template='/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/',
-               root='/nsls2/data/chx/assets/eiger1m/')
+               write_path_template='')
     beam_center_x = ADComponent(EpicsSignalWithRBV, 'cam1:BeamX')
     beam_center_y = ADComponent(EpicsSignalWithRBV, 'cam1:BeamY')
     wavelength = ADComponent(EpicsSignalWithRBV, 'cam1:Wavelength')
@@ -210,6 +299,8 @@ class EigerBase(AreaDetector):
     photon_energy = ADComponent(EpicsSignalWithRBV, 'cam1:PhotonEnergy')
     manual_trigger = ADComponent(EpicsSignalWithRBV, 'cam1:ManualTrigger')  # the checkbox
     special_trigger_button = ADComponent(EpicsSignal, 'cam1:Trigger')  # the button next to 'Start' and 'Stop'
+    stream_enable = ADComponent(EpicsSignal,'cam1:StreamEnable')
+    data_source = ADComponent(EpicsSignal,'cam1:DataSource') # data source like None, FileWriter, Stream
     image = Cpt(ImagePlugin, 'image1:')
     stats1 = Cpt(StatsPlugin, 'Stats1:')
     stats2 = Cpt(StatsPlugin, 'Stats2:')
@@ -232,6 +323,8 @@ class EigerBase(AreaDetector):
         ret = super().stage(*args, **kwargs)
         # after parent
         self.manual_trigger.set(1).wait()
+        self.file.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.file.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return ret
 
     def unstage(self):
@@ -344,17 +437,21 @@ class EigerSingleTrigger(SingleTrigger, EigerBase):
 class EigerSingleTrigger_AD37(SingleTrigger, EigerBaseV33):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.auto_trigger = True
         self.stage_sigs['cam.trigger_mode'] = 0
         self.stage_sigs['shutter_mode'] = 1  # 'EPICS PV'
         self.stage_sigs.update({'num_triggers': 1})
 
     def stage(self, *args, **kwargs):
+        self.file.write_path_template = assets_path() + f'{name_dir_mapping[self.name]}/%Y/%m/%d/'
+        self.file.reg_root = assets_path() + f'{name_dir_mapping[self.name]}'
         return super().stage(*args, **kwargs)
 
     def trigger(self, *args, **kwargs):
         status = super().trigger(*args, **kwargs)
         #set_and_wait(self.special_trigger_button, 1)
-        self.special_trigger_button.set(1).wait()
+        if self.auto_trigger:
+            self.special_trigger_button.set(1).wait()
         return status
 
     def read(self, *args, streaming=False, **kwargs):
@@ -407,6 +504,8 @@ class EigerSingleTrigger_AD37(SingleTrigger, EigerBaseV33):
 class EigerSingleTrigger_AD37_V2(EigerSingleTrigger_AD37):
     cam = Cpt(NewEigerDetectorCamV33, 'cam1:')
 
+
+
 class FastShutterTrigger(Device):
     """This represents the fast trigger *device*.
 
@@ -419,7 +518,7 @@ class FastShutterTrigger(Device):
     acquire = Cpt(EpicsSignal, 'Acquire-Cmd', trigger_value=1)
 
 
-class EigerFastTrigger(EigerBase):
+class EigerFastTrigger(EigerBaseV33):
     tr = Cpt(FastShutterTrigger, '')
 
     def __init__(self, *args, **kwargs):
@@ -510,35 +609,47 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
 
 # test_trig4M = FastShutterTrigger('XF:11IDB-ES{Trigger:Eig4M}', name='test_trig4M')
 
-
 ## This renaming should be reversed: no correspondance between CSS screens, PV names and ophyd....
 xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
+time.sleep(.1) # added by LW 7/7/25 
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
-#OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='OAV')  # printer OAV using Grasshoper UBS3 camera
+time.sleep(.1) # added by LW 7/7/25 
+#OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='OAV')  # printer OAV using Grasshoper UBS3 camera -> this worked in March 2025
+#OAV = StandardProsilicaV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2')  # printer OAV using Grasshoper UBS3 camera
 #OAV.stage_sigs[OAV.cam.trigger_mode] = 'Off'
-
-
-BCam =  StandardProsilicaV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
+BCam =  StandardPointGreyV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+time.sleep(.1) # added by LW 7/7/25 
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
+time.sleep(.1) # added by LW 7/7/25 
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
-#OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='OAV') # printer OAV using Grasshoper UBS3 camera
-OAV_writing.tiff.write_path_template = '/nsls2/data/chx/legacy/data/%Y/%m/%d/'
-OAV_writing.tiff.read_path_template = '/nsls2/data/chx/legacy/data/%Y/%m/%d/'
-OAV_writing.tiff.reg_root = '/nsls2/data/chx/legacy/data/'
+#OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='OAV') # printer OAV using Grasshoper UBS3 camera -> this worked in March 2024
+time.sleep(.1) # added by LW 7/7/25 
+#OAV_writing = StandardProsilicaWithTIFFV33('XF:11ID-M3{Det-Cam:3}', name='oavcam-2') # printer OAV using Grasshoper UBS3 camera
 
+BCam_writing =  StandardPointGreyWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
+time.sleep(.1) # added by LW 7/7/25 
 
-BCam_writing =  StandardProsilicaWithTIFFV33('XF:11IDB-ES{BFLY-Cam:1}', name='BCam')
 fs1 = StandardProsilicaV33('XF:11IDA-BI{FS:1-Cam:1}', name='fs1')
+time.sleep(.1) # added by LW 7/7/25 
 fs2 = StandardProsilicaV33('XF:11IDA-BI{FS:2-Cam:1}', name='fs2')
+time.sleep(.1) # added by LW 7/7/25 
 fs_wbs = StandardProsilicaV33('XF:11IDA-BI{BS:WB-Cam:1}', name='fs_wbs')
+time.sleep(.1) # added by LW 7/7/25 
 # dcm_cam = StandardProsilica('XF:11IDA-BI{Mono:DCM-Cam:1}', name='dcm_cam')
 fs_pbs = StandardProsilicaV33('XF:11IDA-BI{BS:PB-Cam:1}', name='fs_pbs')
+time.sleep(.1) # added by LW 7/7/25 
 # elm = Elm('XF:11IDA-BI{AH401B}AH401B:',)
 
 all_standard_pros = [xray_eye1, xray_eye2, xray_eye3, xray_eye4,
@@ -652,24 +763,21 @@ try:
     set_eiger_defaults(eiger500k_single)
     # AD v3.3+ config:
     eiger500k_single.cam.ensure_nonblocking()
-    eiger500k_single.file.write_path_template = '/nsls2/data/chx/assets/eiger500k/%Y/%m/%d/'
-    eiger500k_single.file.reg_root ='/nsls2/data/chx/assets/eiger500k/'
 except Exception:
     print('eiger500k not configured...')
     raise
 
 # Eiger 1M using internal trigger
-eiger1m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig1M}',
+eiger1m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig1M}', # Not test. Paths are not defined originally
                                     name='eiger1m_single')
 set_eiger_defaults(eiger1m_single)
 # AD v3.3+ config:
 eiger1m_single.cam.ensure_nonblocking()
 
+
 # Eiger 4M using internal trigger
 eiger4m_single = EigerSingleTrigger_AD37_V2('XF:11IDB-ES{Det:Eig4M}',
                                     name='eiger4m_single')
-eiger4m_single.file.write_path_template = '/nsls2/data/chx/assets/eiger4m/%Y/%m/%d/'
-eiger4m_single.file.reg_root ='/nsls2/data/chx/assets/eiger4m/'
 set_eiger_defaults(eiger4m_single)
 # AD v3.3+ config:
 eiger4m_single.cam.ensure_nonblocking()
@@ -678,22 +786,16 @@ try:
     # Eiger 500K using fast trigger assembly
     eiger500k = EigerFastTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k')
     set_eiger_defaults(eiger500k)
-    eiger500k.file.write_path_template = '/nsls2/data/chx/assets/eiger500k/%Y/%m/%d/'
-    eiger500k.file.reg_root ='/nsls2/data/chx/assets/eiger500k/'
 except Exception:
     print('eiger500k not configured...')
 
 # Eiger 1M using fast trigger assembly
 eiger1m = EigerFastTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m')
 set_eiger_defaults(eiger1m)
-eiger1m.file.write_path_template = '/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/'
-eiger1m.file.reg_root ='/nsls2/data/chx/assets/eiger1m/'
 
 # Eiger 4M using fast trigger assembly
 eiger4m = EigerFastTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m')
 set_eiger_defaults(eiger4m)
-eiger4m.file.write_path_template = '/nsls2/data/chx/assets/eiger4m/%Y/%m/%d/'
-eiger4m.file.reg_root ='/nsls2/data/chx/assets/eiger4m/'
 
 # setup manual eiger for 1d scans
 # prototype
@@ -702,19 +804,13 @@ eiger4m.file.reg_root ='/nsls2/data/chx/assets/eiger4m/'
 # (only one key name should be used)
 eiger4m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig4M}', name='eiger4m_single')
 set_eiger_defaults(eiger4m_manual)
-eiger4m_manual.file.write_path_template = '/nsls2/data/chx/assets/eiger4m/%Y/%m/%d/'
-eiger4m_manual.file.reg_root ='/nsls2/data/chx/assets/eiger4m/'
 
 eiger1m_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig1M}', name='eiger1m_single')
 set_eiger_defaults(eiger1m_manual)
-eiger1m_manual.file.write_path_template = '/nsls2/data/chx/assets/eiger1m/%Y/%m/%d/'
-eiger1m_manual.file.reg_root ='/nsls2/data/chx/assets/eiger1m/'
 
 try:
     eiger500k_manual = EigerManualTrigger('XF:11IDB-ES{Det:Eig500K}', name='eiger500k_single')
     set_eiger_defaults(eiger500k_manual)
-    eiger500k_manual.file.write_path_template = '/nsls2/data/chx/assets/eiger500k/%Y/%m/%d/'
-    eiger500k_manual.file.reg_root ='/nsls2/data/chx/assets/eiger500k/'
 except Exception:
     print('eiger500k not configured...')
 
