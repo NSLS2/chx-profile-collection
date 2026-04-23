@@ -247,6 +247,13 @@ def overnight_YEAH():
 		RE(mv(diff.om,om0)) # move back to the nominal bragg center
 
 
+	temps = [195, 196, 197, 198, 200]
+
+	for temp in temps:
+		caput('XF:11IDB-ES{Env:02}LS340:TC1:wr_SP1',temp) #set tenperature
+		series(det='eiger1m',expt=1,imnum=3600,feedback_on=True,auto_compression=True,comment="AUTO_COMMENT")
+		time.sleep(5)
+		series(det='eiger1m',expt=1,imnum=3600,feedback_on=True,auto_compression=True,comment="AUTO_COMMENT")
 
 
 	
