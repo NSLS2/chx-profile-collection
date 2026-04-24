@@ -80,3 +80,6 @@ zz-dama.py
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+
+usermacros/
+usermacros2/
