@@ -1,6 +1,13 @@
 import nslsii
-import redis
-import os
+from bluesky import RunEngine
+nslsii.configure_base(
+    get_ipython().user_ns,
+    'chx',
+    redis_url = "xf11id1-chx-redis1.nsls2.bnl.gov",
+    redis_port = 6380,
+    redis_ssl = True,
+    publish_documents_with_kafka=False
+)
 
 import time
 from redis_json_dict import RedisJSONDict
@@ -65,9 +72,6 @@ db = Broker(tiled_reading_client)
 
 # set plot properties for 4k monitors
 plt.rcParams['figure.dpi']=200
-
-# Set the metadata dictionary
-RE.md = RedisJSONDict(redis.Redis("info.chx.nsls2.bnl.gov"), prefix="")
 
 # Setup the path to the secure assets folder for the current proposal
 def assets_path():
