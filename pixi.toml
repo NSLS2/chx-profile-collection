@@ -35,7 +35,7 @@ blosc-hdf5-plugin = ">=1.0.1,<2"
 epicscorelibs = ">=7.0.7.99.1.1,<8"
 scikit-beam = ">=0.0.27,<0.0.28"
 bluesky-tiled-plugins = ">=2.0.2"
-ophyd-async = ">=0.13.7,<0.14"
+ophyd-async = ">=0.20"
 blop = "1.0.0b1"
 
 [feature.profile.pypi-dependencies]
