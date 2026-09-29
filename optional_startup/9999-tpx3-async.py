@@ -7,6 +7,9 @@ from ophyd_async.core import (
     PathProvider,
     UUIDFilenameProvider,
     AsyncStatus,
+    WatchableAsyncStatus,
+    AsyncIterator,
+    WatcherUpdate,
     soft_signal_rw,
     SignalRW,
     SignalR,
@@ -20,6 +23,7 @@ from ophyd_async.epics.core import PvSuffix
 from ophyd_async.epics.adcore import (
     AreaDetector,
     ADBaseIO,
+    ADAcquireLogic,
     NDPluginFileIO,
     NDStatsIO,
     NDROIIO,
@@ -32,6 +36,15 @@ class ChainMode(StrictEnum):
     NONE = "NONE"
     LEADER = "LEADER"
     FOLLOWER = "FOLLOWER"
+
+class Tpx3AcquireLogic(ADAcquireLogic):
+
+    def __init__(self, driver):
+        self.driver = driver
+
+    async def start_acquiring(self):
+        await self.driver.parent.driver.update_file_template()
+        await super().start_acquiring()
 
 class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
@@ -50,6 +63,19 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     bias_voltage: A[SignalRW[int], PvSuffix.rbv("BiasVolt"), Format.CONFIG_SIGNAL]
     bias_enable: A[SignalRW[bool], PvSuffix.rbv("BiasEnbl"), Format.CONFIG_SIGNAL]
     chain_mode: A[SignalRW[ChainMode], PvSuffix.rbv("ChainMode"), Format.CONFIG_SIGNAL]
+
+    # BPC/DACS file config
+    bpc_filepath: A[SignalRW[str], PvSuffix.rbv("BPCFilePath"), Format.CONFIG_SIGNAL]
+    bpc_filename: A[SignalRW[str], PvSuffix.rbv("BPCFileName"), Format.CONFIG_SIGNAL]
+    bpc_filepath_exists: A[SignalR[bool], PvSuffix("BPCFilePathExists_RBV"), Format.CONFIG_SIGNAL]
+    bpc_write_file: A[SignalRW[int], PvSuffix("WriteBPCFile")]
+
+    dacs_filepath: A[SignalRW[str], PvSuffix.rbv("DACSFilePath"), Format.CONFIG_SIGNAL]
+    dacs_filename: A[SignalRW[str], PvSuffix.rbv("DACSFileName"), Format.CONFIG_SIGNAL]
+    dacs_filepath_exists: A[SignalR[bool], PvSuffix("DACSFilePathExists_RBV"), Format.CONFIG_SIGNAL]
+    dacs_write_file: A[SignalRW[int], PvSuffix("WriteDACSFile")]
+
+    write_file_msg: A[SignalR[str], PvSuffix("WriteFileMessage")]
 
     # Filepath logic
     set_settings: A[SignalW[int], PvSuffix("WriteData")]
@@ -75,6 +101,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     hdf5_create_directory: A[SignalRW[int], PvSuffix.rbv("HDF1:CreateDirectory")]
 
     async def init_file_writing(self) -> None:
+        """Initialize filepaths on Serval through IOC and create directory on NFS"""
         self._write_path = str(self._path_provider())
 
         # create directory in NFS
@@ -84,11 +111,23 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
         # set directory/filename in Serval
         self._res_uid = '-'.join(str(UUIDFilenameProvider()).split("-")[:-1])
         await self.raw_filepath.set("file:" + self._write_path)
-        await self.raw_file_template.set(f"{self._res_uid}_0") # TODO i don't think we need this
-        await self.update_file_template()
+        # await self.raw_file_template.set(f"{self._res_uid}_0") # TODO i don't think we need this, gets called in trigger
+
+        await self.raw_write_enable.set(1)
+        await self.set_settings.set(1)
+
+        # await self.update_file_template() # TODO shouldn't need this, it gets called on trigger
+        self._n = 0
+
+    async def uninit_file_writing(self) -> None:
+        """Uninitialize filepaths on Serval through IOC"""
+        await self.raw_filepath.set('file:placeholder')
+        await self.raw_file_template.set(f"template_placeholder")
+        await self.raw_write_enable.set(0)
+        await self.set_settings.set(1)
 
     async def update_file_template(self) -> None:
-        # set file template on Serval, will be (<uid>_<n>_<serval_counter>.tpx3)
+        # set file template on Serval, will be <uid>_<n>_<serval_counter>.tpx3
         await self.raw_file_template.set(f"{self._res_uid}_{self._n:05d}_")
         await self.set_settings.set(1)
 
@@ -115,8 +154,8 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
         *args,
         **kwargs
     ):
-
         driver = Tpx3DriverIO(prefix + driver_suffix, path_provider)
+        _acquire_logic = Tpx3AcquireLogic(driver)
 
         plugins: dict[str, NDPluginBaseIO] = {
             "stats1": NDStatsIO(prefix=prefix + 'Stats1:', name="stats1"),
@@ -134,6 +173,7 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
             driver=driver,
             name=name,
             plugins=plugins,
+            acquire_logic=_acquire_logic,
             *args,
             **kwargs
         )
@@ -146,10 +186,10 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
 
     @AsyncStatus.wrap
     async def unstage(self) -> None:
-        ...
+        await self.driver.uninit_file_writing()
         await super().unstage()
 
 
-pp = NSLS2PathProvider()
+pp = NSLS2PathProvider(RE.md)
 
 tpx3_1 = Tpx3Detector("XF:11ID1-ES{TPX:1}", path_provider=pp, name="tpx3_1")
