@@ -1,16 +1,9 @@
 from typing import Annotated as A
-from datetime import datetime
-from pathlib import Path
 
 from ophyd_async.core import (
-    PathInfo,
     PathProvider,
     UUIDFilenameProvider,
     AsyncStatus,
-    WatchableAsyncStatus,
-    AsyncIterator,
-    WatcherUpdate,
-    soft_signal_rw,
     SignalRW,
     SignalR,
     SignalW,
@@ -24,7 +17,6 @@ from ophyd_async.epics.adcore import (
     AreaDetector,
     ADBaseIO,
     ADAcquireLogic,
-    NDPluginFileIO,
     NDStatsIO,
     NDROIIO,
     NDPluginBaseIO,
