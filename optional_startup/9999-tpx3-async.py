@@ -39,8 +39,9 @@ class FileWriteStatus(StrictEnum):
 
 class Tpx3AcquireLogic(ADAcquireLogic):
 
-    def __init__(self, driver):
+    async def __init__(self, driver, *args, **kwargs):
         self.driver = driver
+        super().__init__(driver, *args, **kwargs)
 
     async def start_acquiring(self):
         await self.driver.parent.driver.update_file_template()
