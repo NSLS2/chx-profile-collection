@@ -94,7 +94,7 @@ class Tpx3DriverIO(ADBaseIO, NDFileIO, StandardReadable):
 
     async def init_file_writing(self) -> None:
         """Initialize filepaths on Serval through IOC and create directory on NFS"""
-        self._write_path = str(self._path_provider(self.name))
+        self._write_path = str(self._path_provider(self._det_name))
 
         # create directory in NFS
         await self.create_directory.set(-4)
@@ -129,9 +129,9 @@ class Tpx3DriverIO(ADBaseIO, NDFileIO, StandardReadable):
         self._n += 1
         await self.raw_filepaths.set(filenames)
 
-    def __init__(self, prefix: str, path_provider: PathProvider, *args, **kwargs):
+    def __init__(self, prefix: str, path_provider: PathProvider, det_name: str, *args, **kwargs):
         self._path_provider = path_provider
-
+        self._det_name = det_name
         # soft signal that stores the predicted filepaths when staged
         with self.add_children_as_readables(Format.UNCACHED_SIGNAL):
             self.raw_filepaths = soft_signal_rw(Sequence[str], initial_value=[])
@@ -151,7 +151,7 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
         *args,
         **kwargs
     ):
-        driver = Tpx3DriverIO(prefix + driver_suffix, path_provider)
+        driver = Tpx3DriverIO(prefix + driver_suffix, path_provider, name)
         _acquire_logic = Tpx3AcquireLogic(driver)
 
         plugins: dict[str, NDPluginBaseIO] = {
