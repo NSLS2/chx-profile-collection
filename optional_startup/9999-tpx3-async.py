@@ -1,9 +1,10 @@
-from typing import Annotated as A
+from typing import Annotated as A, Sequence
 
 from ophyd_async.core import (
     PathProvider,
     UUIDFilenameProvider,
     AsyncStatus,
+    soft_signal_rw,
     SignalRW,
     SignalR,
     SignalW,
@@ -85,16 +86,13 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
     prv1_filepath: A[SignalRW[str], PvSuffix.rbv("PrvImg1FilePath"), Format.CONFIG_SIGNAL]
 
-    # Keeping for backwards compatibility
-    raw_filepaths: A[SignalRW[list], Format.UNCACHED_SIGNAL]
-
     # HDF5 plugin for creating directory TODO is there a better way to do this?
     hdf5_file_path: A[SignalRW[str], PvSuffix.rbv("HDF1:FilePath")]
     hdf5_create_directory: A[SignalRW[int], PvSuffix.rbv("HDF1:CreateDirectory")]
 
     async def init_file_writing(self) -> None:
         """Initialize filepaths on Serval through IOC and create directory on NFS"""
-        self._write_path = str(self._path_provider())
+        self._write_path = str(self._path_provider(self.name))
 
         # create directory in NFS
         await self.hdf5_create_directory.set(-4)
@@ -131,6 +129,11 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
     def __init__(self, prefix: str, path_provider: PathProvider, *args, **kwargs):
         self._path_provider = path_provider
+
+        # soft signal that stores the predicted filepaths when staged
+        with self.add_children_as_readables(Format.UNCACHED_SIGNAL):
+            self.raw_filepaths = soft_signal_rw(Sequence[str], initial_value=[])
+
         super().__init__(prefix, *args, **kwargs)
   
         self._n = 0
@@ -184,4 +187,4 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
 
 pp = NSLS2PathProvider(RE.md)
 
-tpx3_1 = Tpx3Detector("XF:11ID1-ES{TPX:1}", path_provider=pp, name="tpx3_1")
+tpx3_1 = Tpx3Detector("XF:11ID1-ES{TPX:1}", path_provider=pp, name="timepix-1")
