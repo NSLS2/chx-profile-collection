@@ -144,7 +144,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
         # create directory in NFS
         await self.parent.hdf1.create_directory.set(-4)
-        await self.parent.file_path.set(self._write_path)
+        await self.parent.hdf1.file_path.set(self._write_path)
 
 
         # set directory/filename in Serval
