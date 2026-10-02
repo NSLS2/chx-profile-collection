@@ -7,7 +7,7 @@ from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    AreaDetector, EpicsSignal, EpicsSignalRO, ROIPlugin,
                    TransformPlugin, ProcessPlugin, Device, DeviceStatus,
                    OverlayPlugin, ProsilicaDetectorCam, PointGreyDetector, PointGreyDetectorCam)
-
+from ophyd_async.epics.advimba import VimbaDetector
 from ophyd.status import StatusBase
 from ophyd.device import Staged
 from ophyd.areadetector.cam import AreaDetectorCam
@@ -609,6 +609,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
 
         return st
 
+from ophyd_async.epics.adcore import NDStatsIO, NDROIIO
 
 # test_trig4M = FastShutterTrigger('XF:11IDB-ES{Trigger:Eig4M}', name='test_trig4M')
 
@@ -617,8 +618,19 @@ xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
 time.sleep(.1) # added by LW 7/7/25 
 xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 time.sleep(.1) # added by LW 7/7/25 
-xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
-time.sleep(.1) # added by LW 7/7/25 
+xray_eye3 = VimbaDetector(
+    "XF:11IDB-BI{Cam:08}",
+    name='xray_eye3', 
+    plugins={
+        "stats1": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats1:"),
+        "stats2": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats2:"),
+        "stats3": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats3:"),
+        "stats4": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats4:"),
+        "stats5": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats5:"),
+    }
+)
+# xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+# time.sleep(.1) # added by LW 7/7/25 
 xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 time.sleep(.1) # added by LW 7/7/25 
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
@@ -632,8 +644,8 @@ xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', nam
 time.sleep(.1) # added by LW 7/7/25 
 xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 time.sleep(.1) # added by LW 7/7/25 
-xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
-time.sleep(.1) # added by LW 7/7/25 
+# xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
+# time.sleep(.1) # added by LW 7/7/25 
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 time.sleep(.1) # added by LW 7/7/25 
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
