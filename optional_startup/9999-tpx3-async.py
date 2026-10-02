@@ -148,7 +148,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
 
         # set directory/filename in Serval
-        self._res_uid = '-'.join(str(UUIDFilenameProvider()).split("-")[:-1])
+        self._res_uid = str(self._uu())
         await self.raw_filepath.set("file:" + self._write_path)
         # await self.raw_file_template.set(f"{self._res_uid}_0") # TODO i don't think we need this, gets called in trigger
 
@@ -179,7 +179,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     def __init__(self, prefix: str, path_provider: PathProvider, det_name: str, *args, **kwargs):
         self._path_provider = path_provider
         self._det_name = det_name
-
+        self._uu = UUIDFilenameProvider()
         # soft signal that stores the predicted filepaths when staged
         with self.add_children_as_readables(Format.UNCACHED_SIGNAL):
             self.raw_filepaths = soft_signal_rw(Sequence[str], initial_value=[])
