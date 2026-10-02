@@ -1,4 +1,5 @@
 from contextlib import nullcontext
+import asyncio
 import time as ttime  # tea time
 from types import SimpleNamespace
 from datetime import datetime
@@ -8,6 +9,10 @@ from ophyd import (ProsilicaDetector, SingleTrigger, TIFFPlugin,
                    TransformPlugin, ProcessPlugin, Device, DeviceStatus,
                    OverlayPlugin, ProsilicaDetectorCam, PointGreyDetector, PointGreyDetectorCam)
 from ophyd_async.epics.advimba import VimbaDetector
+from ophyd_async.core import (
+    AsyncStatus, EnableDisable, UUIDFilenameProvider, YMDPathProvider, init_devices,
+)
+from ophyd_async.epics.adcore import ADWriterFactory, NDStatsIO, PluginSignalDataLogic
 from ophyd.status import StatusBase
 from ophyd.device import Staged
 from ophyd.areadetector.cam import AreaDetectorCam
@@ -609,7 +614,49 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
 
         return st
 
-from ophyd_async.epics.adcore import NDStatsIO, NDROIIO
+class CHXVimbaDetector(VimbaDetector):
+    """Vimba step-scan detector with TIFF images and five statistics totals."""
+
+    def __init__(self, prefix, path_provider, name):
+        plugins = {
+            f"stats{i}": NDStatsIO(f"{prefix}Stats{i}:")
+            for i in range(1, 6)
+        }
+        super().__init__(
+            prefix,
+            ADWriterFactory.tiff(path_provider, datakey_suffix="_image"),
+            plugins=plugins,
+            name=name,
+        )
+        # Keep the existing field names used by CHX plotting/analysis code.
+        self.set_name(name, child_name_separator="_")
+        for plugin in plugins.values():
+            self.add_detector_logics(PluginSignalDataLogic(self.driver, plugin.total))
+
+    @property
+    def hints(self):
+        return {"fields": [self.stats1.total.name]}
+
+    @AsyncStatus.wrap
+    async def stage(self):
+        await super().stage()
+        await self.driver.wait_for_plugins.set(True)
+        await self.tiff.enable_callbacks.set(EnableDisable.ENABLE)
+        for i in range(1, 6):
+            plugin = getattr(self, f"stats{i}")
+            await asyncio.gather(
+                plugin.enable_callbacks.set(EnableDisable.ENABLE),
+                plugin.compute_statistics.set(True),
+            )
+
+
+def xray_eye3_path_provider(datakey_name=None):
+    # Resolve the proposal at acquisition time, since RE.md can change after startup.
+    return YMDPathProvider(
+        UUIDFilenameProvider(),
+        PurePath(assets_path()) / name_dir_mapping['xray_eye3'],
+        create_dir_depth=-4,
+    )()
 
 # test_trig4M = FastShutterTrigger('XF:11IDB-ES{Trigger:Eig4M}', name='test_trig4M')
 
@@ -618,19 +665,12 @@ xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
 time.sleep(.1) # added by LW 7/7/25 
 xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 time.sleep(.1) # added by LW 7/7/25 
-xray_eye3 = VimbaDetector(
-    "XF:11IDB-BI{Cam:08}",
-    name='xray_eye3', 
-    plugins={
-        "stats1": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats1:"),
-        "stats2": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats2:"),
-        "stats3": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats3:"),
-        "stats4": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats4:"),
-        "stats5": NDStatsIO("XF:11IDB-BI{Cam:08}" + "Stats5:"),
-    }
-)
-# xray_eye3 = StandardProsilicaV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
-# time.sleep(.1) # added by LW 7/7/25 
+with init_devices():
+    xray_eye3 = CHXVimbaDetector(
+        "XF:11IDB-BI{Cam:08}",
+        path_provider=xray_eye3_path_provider,
+        name='xray_eye3',
+    )
 xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 time.sleep(.1) # added by LW 7/7/25 
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
@@ -644,8 +684,8 @@ xray_eye1_writing = StandardProsilicaWithTIFFV33('XF:11IDA-BI{Bpm:1-Cam:1}', nam
 time.sleep(.1) # added by LW 7/7/25 
 xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 time.sleep(.1) # added by LW 7/7/25 
-# xray_eye3_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:08}', name='xray_eye3')
-# time.sleep(.1) # added by LW 7/7/25 
+# Both names use the same detector; Vimba counts include TIFF images and totals.
+xray_eye3_writing = xray_eye3
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 time.sleep(.1) # added by LW 7/7/25 
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
@@ -667,9 +707,9 @@ fs_pbs = StandardProsilicaV33('XF:11IDA-BI{BS:PB-Cam:1}', name='fs_pbs')
 time.sleep(.1) # added by LW 7/7/25 
 # elm = Elm('XF:11IDA-BI{AH401B}AH401B:',)
 
-all_standard_pros = [xray_eye1, xray_eye2, xray_eye3, xray_eye4,
+all_standard_pros = [xray_eye1, xray_eye2, xray_eye4,
                      xray_eye1_writing, xray_eye2_writing,
-                     xray_eye3_writing, xray_eye4_writing,
+                     xray_eye4_writing,
                      OAV, OAV_writing,
                      fs1, fs2,
                      fs_wbs, fs_pbs,    #BCam, BCam_writing,
@@ -695,7 +735,7 @@ for camera in all_standard_pros:
 #OAV_writing.stage_sigs[OAV_writing.cam.trigger_mode] = 'Off'
 
 for camera in [xray_eye1_writing, xray_eye2_writing, BCam_writing,
-               xray_eye3_writing, xray_eye4_writing, OAV_writing]:
+               xray_eye4_writing, OAV_writing]:
     camera.read_attrs.append('tiff')
     camera.tiff.read_attrs = []
     camera.cam.ensure_nonblocking()
