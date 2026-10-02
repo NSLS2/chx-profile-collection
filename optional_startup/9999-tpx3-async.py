@@ -103,10 +103,10 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     det_orientation: A[SignalRW[Orientation], PvSuffix.rbv("DetOrient"), Format.CONFIG_SIGNAL]
 
     # Detector chip config
-    chip0: A[Tpx3ChipIO, PvSuffix("CHIP0")]
-    chip1: A[Tpx3ChipIO, PvSuffix("CHIP1")]
-    chip2: A[Tpx3ChipIO, PvSuffix("CHIP2")]
-    chip3: A[Tpx3ChipIO, PvSuffix("CHIP3")]
+    # chip0: A[Tpx3ChipIO, PvSuffix("CHIP0")]
+    # chip1: A[Tpx3ChipIO, PvSuffix("CHIP1")]
+    # chip2: A[Tpx3ChipIO, PvSuffix("CHIP2")]
+    # chip3: A[Tpx3ChipIO, PvSuffix("CHIP3")]
 
     # BPC/DACS file config
     bpc_filepath: A[SignalRW[str], PvSuffix.rbv("BPCFilePath"), Format.CONFIG_SIGNAL]
