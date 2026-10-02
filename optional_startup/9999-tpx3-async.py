@@ -99,7 +99,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     tdc_port1: A[SignalRW[TDC], PvSuffix.rbv("Tdc1"), Format.CONFIG_SIGNAL]
     global_timestamp_intvl: A[SignalRW[float], PvSuffix.rbv("GlblTimestampIntvl"), Format.CONFIG_SIGNAL]
     ref_clock: A[SignalRW[bool], PvSuffix.rbv("RefClock"), Format.CONFIG_SIGNAL]
-    log_level: A[SignalRW[int], PvSuffix.rbv("LogLevel"), Format.CONFIG_SIGNAL]
+    # log_level: A[SignalRW[int], PvSuffix.rbv("LogLevel"), Format.CONFIG_SIGNAL]
     det_orientation: A[SignalRW[Orientation], PvSuffix.rbv("DetOrient"), Format.CONFIG_SIGNAL]
 
     # Detector chip config
