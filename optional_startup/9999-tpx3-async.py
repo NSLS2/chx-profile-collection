@@ -13,7 +13,7 @@ from ophyd_async.core import (
     StrictEnum,
 )
 
-from ophyd_async.epics.core import PvSuffix
+from ophyd_async.epics.core import PvSuffix, EpicsDevice
 from ophyd_async.epics.adcore import (
     AreaDetector,
     ADBaseIO,
@@ -22,7 +22,6 @@ from ophyd_async.epics.adcore import (
     NDROIIO,
     NDPluginBaseIO,
     NDPluginFileIO,
-    NDFileIO,
 )
 
 from nslsii.ophyd_async.providers import NSLS2PathProvider
@@ -32,20 +31,42 @@ class ChainMode(StrictEnum):
     LEADER = "LEADER"
     FOLLOWER = "FOLLOWER"
 
-class FileWriteStatus(StrictEnum):
-    DONE = "Done"
-    WRITE = "Write"
+class Polarity(StrictEnum):
+    POSITIVE = "Positive"
+    NEGATIVE = "Negative"
 
+class TDC(StrictEnum):
+    P0123 = "P0123"
+    N0123 = "N0123"
+    PNO123 = "PN0123"
+    P0 = "P0"
+    N0 = "N0"
+    PN0 = "PN0"
+
+class Orientation(StrictEnum):
+    UP = "UP"
+    RIGHT = "RIGHT"
+    DOWN = "DOWN"
+    LEFT = "LEFT"
+    UP_MIRRORED = "UP_MIRRORED"
+    RIGHT_MIRRORED = "RIGHT_MIRRORED"
+    DOWN_MIRRORED = "DOWN_MIRRORED"
+    LEFT_MIRRORED = "LEFT_MIRRORED"
 
 class Tpx3AcquireLogic(ADAcquireLogic):
 
-    async def __init__(self, driver, *args, **kwargs):
+    def __init__(self, driver, *args, **kwargs):
         self.driver = driver
         super().__init__(driver, *args, **kwargs)
 
     async def start_acquiring(self):
         await self.driver.parent.driver.update_file_template()
         await super().start_acquiring()
+
+class Tpx3ChipIO(EpicsDevice):
+
+    ikrum: A[SignalRW[float], PvSuffix("Ikrum"), Format.CONFIG_SIGNAL]
+    
 
 class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
@@ -57,6 +78,8 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     bias_voltage_h: A[SignalR[float], PvSuffix("BiasVoltage_RBV"), Format.CONFIG_SIGNAL]
     humidity: A[SignalR[int], PvSuffix("Humidity_RBV"), Format.CONFIG_SIGNAL]
     chip_temps: A[SignalR[str], PvSuffix("ChipTemps_RBV"), Format.CONFIG_SIGNAL]
+    vdd: A[SignalR[str], PvSuffix("VDD_RBV"), Format.CONFIG_SIGNAL]
+    avdd: A[SignalR[str], PvSuffix("AVDD_RBV"), Format.CONFIG_SIGNAL]
 
     # Detector config
     fan1_pwm: A[SignalR[int], PvSuffix("Fan1PWM_RBV"), Format.CONFIG_SIGNAL]
@@ -64,6 +87,26 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     bias_voltage: A[SignalRW[int], PvSuffix.rbv("BiasVolt"), Format.CONFIG_SIGNAL]
     bias_enable: A[SignalRW[bool], PvSuffix.rbv("BiasEnbl"), Format.CONFIG_SIGNAL]
     chain_mode: A[SignalRW[ChainMode], PvSuffix.rbv("ChainMode"), Format.CONFIG_SIGNAL]
+    polarity: A[SignalRW[Polarity], PvSuffix.rbv("Polarity"), Format.CONFIG_SIGNAL]
+    trigger_modec: A[SignalR[str], PvSuffix("TriggerModeC_RBV"), Format.CONFIG_SIGNAL]
+    exposure_time: A[SignalR[float], PvSuffix("ExposureTime_RBV"), Format.CONFIG_SIGNAL]
+    trigger_period: A[SignalR[float], PvSuffix("TriggerPeriod_RBV"), Format.CONFIG_SIGNAL]
+    nTriggers: A[SignalR[int], PvSuffix("nTriggers_RBV"), Format.CONFIG_SIGNAL]
+    periph_clk80: A[SignalRW[bool], PvSuffix("PeriphClk80"), Format.CONFIG_SIGNAL]
+    trigger_delay: A[SignalRW[float], PvSuffix("TriggerDelay"), Format.CONFIG_SIGNAL]
+    tdc: A[SignalR[str], PvSuffix("Tdc_RBV"), Format.CONFIG_SIGNAL]
+    tdc_port0: A[SignalRW[TDC], PvSuffix.rbv("Tdc0"), Format.CONFIG_SIGNAL]
+    tdc_port1: A[SignalRW[TDC], PvSuffix.rbv("Tdc1"), Format.CONFIG_SIGNAL]
+    global_timestamp_intvl: A[SignalRW[float], PvSuffix.rbv("GlblTimestampIntvl"), Format.CONFIG_SIGNAL]
+    ref_clock: A[SignalRW[bool], PvSuffix.rbv("RefClock"), Format.CONFIG_SIGNAL]
+    log_level: A[SignalRW[int], PvSuffix.rbv("LogLevel"), Format.CONFIG_SIGNAL]
+    det_orientation: A[SignalRW[Orientation], PvSuffix.rbv("DetOrient"), Format.CONFIG_SIGNAL]
+
+    # Detector chip config
+    chip0: A[Tpx3ChipIO, PvSuffix("CHIP0")]
+    chip1: A[Tpx3ChipIO, PvSuffix("CHIP1")]
+    chip2: A[Tpx3ChipIO, PvSuffix("CHIP2")]
+    chip3: A[Tpx3ChipIO, PvSuffix("CHIP3")]
 
     # BPC/DACS file config
     bpc_filepath: A[SignalRW[str], PvSuffix.rbv("BPCFilePath"), Format.CONFIG_SIGNAL]
@@ -74,7 +117,8 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     dacs_filepath: A[SignalRW[str], PvSuffix.rbv("DACSFilePath"), Format.CONFIG_SIGNAL]
     dacs_filename: A[SignalRW[str], PvSuffix.rbv("DACSFileName"), Format.CONFIG_SIGNAL]
     dacs_filepath_exists: A[SignalR[bool], PvSuffix("DACSFilePathExists_RBV"), Format.CONFIG_SIGNAL]
-    dacs_write_file: A[SignalRW[FileWriteStatus], PvSuffix("WriteDACSFile")]
+    dacs_write_file: A[SignalRW[bool], PvSuffix("WriteDACSFile")]
+
 
     write_file_msg: A[SignalR[str], PvSuffix("WriteFileMessage")]
 
