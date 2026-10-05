@@ -13,7 +13,6 @@ from ophyd_async.core import (
     StandardReadableFormat as Format,
     StrictEnum,
     SoftSignalBackend,
-    DataKey
 )
 
 from ophyd_async.epics.core import PvSuffix, EpicsDevice
