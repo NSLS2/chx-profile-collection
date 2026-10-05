@@ -81,7 +81,7 @@ class Tpx3AcquireLogic(ADAcquireLogic):
 
 class Tpx3ChipIO(EpicsDevice, StandardReadable):
 
-    ikrum: A[SignalRW[float], PvSuffix("Ikrum"), Format.CONFIG_SIGNAL]
+    ikrum: A[SignalRW[float], PvSuffix("Ikrum_RBV"), Format.CONFIG_SIGNAL]
 
 
 class Tpx3DriverIO(ADBaseIO, StandardReadable):
