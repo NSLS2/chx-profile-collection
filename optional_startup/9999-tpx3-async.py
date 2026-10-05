@@ -82,7 +82,7 @@ class FilePathsSignal(SignalRW[Sequence[str]]):
 
     async def describe(self):
         datakeys = await super().describe()
-        datakeys[self.name]["dtype_numpy"] = np.asarray(self.read()).dtype
+        datakeys[self.name]["dtype_numpy"] = np.asarray(self.read()[]).dtype
         return datakeys
 
 class Tpx3AcquireLogic(ADAcquireLogic):
@@ -200,7 +200,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
 
         # set directory/filename in Serval
-        self._res_uid = str(self._uu())
+        self._res_uid = str(''.join(self._uu().split("-")[:-1]))
         await self.raw_filepath.set("file:" + self._write_path)
         # await self.raw_file_template.set(f"{self._res_uid}_0") # TODO i don't think we need this, gets called in trigger
 
