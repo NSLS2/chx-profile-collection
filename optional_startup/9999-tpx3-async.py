@@ -266,11 +266,11 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
 
         # register plugin signals
         for j in range(1, 5):
-            stat = getattr(self, f"stat{j}")
+            stat = getattr(self, f"stats{j}")
             self.add_detector_logics(
                 PluginSignalDataLogic(
                     driver=self.driver,
-                    signal=stat.count,
+                    signal=stat.total,
                     hinted=True
                 )
             )
