@@ -82,7 +82,27 @@ class Tpx3AcquireLogic(ADAcquireLogic):
         await super().start_acquiring()
 
 class Tpx3ChipIO(EpicsDevice, StandardReadable):
-
+    cp_pll: A[SignalR[int], PvSuffix("CP_PLL_RBV"), Format.CONFIG_SIGNAL]
+    s1_off: A[SignalR[int], PvSuffix("S1_OFF_RBV"), Format.CONFIG_SIGNAL]
+    s1_on: A[SignalR[int], PvSuffix("S1_ON_RBV"), Format.CONFIG_SIGNAL]
+    s2_off: A[SignalR[int], PvSuffix("S2_OFF_RBV"), Format.CONFIG_SIGNAL]
+    s2_on: A[SignalR[int], PvSuffix("S2_ON_RBV"), Format.CONFIG_SIGNAL]
+    ikrum: A[SignalRW[int], PvSuffix("Ikrum_RBV"), Format.CONFIG_SIGNAL]
+    pixel_dac: A[SignalR[int], PvSuffix("PixelDAC_RBV"), Format.CONFIG_SIGNAL]
+    preamp_off: A[SignalR[int], PvSuffix("Preamp_OFF_RBV"), Format.CONFIG_SIGNAL]
+    preamp_on: A[SignalR[int], PvSuffix("Preamp_ON_RBV"), Format.CONFIG_SIGNAL]
+    tp_buffer_in: A[SignalR[int], PvSuffix("TPbufferIn_RBV"), Format.CONFIG_SIGNAL]
+    tp_buffer_out: A[SignalR[int], PvSuffix("TPbufferOut_RBV"), Format.CONFIG_SIGNAL]
+    pll_vcntrl: A[SignalR[int], PvSuffix("PLL_Vcntrl_RBV"), Format.CONFIG_SIGNAL]
+    v_preamp_ncas: A[SignalR[int], PvSuffix("VPreamp_NCAS_RBV"), Format.CONFIG_SIGNAL]
+    vtp_coarse: A[SignalR[int], PvSuffix("VTP_coarse_RBV"), Format.CONFIG_SIGNAL]
+    vtp_fine: A[SignalR[int], PvSuffix("VTP_fine_RBV"), Format.CONFIG_SIGNAL]
+    vfbk: A[SignalR[int], PvSuffix("Vfbk_RBV"), Format.CONFIG_SIGNAL]
+    vth_coarse: A[SignalRW[int], PvSuffix.rbv("Vth_coarse"), Format.CONFIG_SIGNAL]
+    vth_fine: A[SignalRW[int], PvSuffix.rbv("Vth_fine"), Format.CONFIG_SIGNAL]
+    adjust: A[SignalR[int], PvSuffix.rbv("Adjust_RBV"), Format.CONFIG_SIGNAL]
+    layout: A[SignalR[str], PvSuffix.rbv("Layout_RBV"), Format.CONFIG_SIGNAL]
+    temp: A[SignalR[int], PvSuffix.rbv("Temp_RBV"), Format.CONFIG_SIGNAL]
     ikrum: A[SignalRW[int], PvSuffix("Ikrum_RBV"), Format.CONFIG_SIGNAL]
 
 
@@ -242,7 +262,19 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
             **kwargs
         )
 
+        # gather and add all config signals
         self.add_config_signals(*gather_config_signals(self))
+
+        # register plugin signals
+        for j in range(1, 5):
+            stat = getattr(self, f"stat{j}")
+            self.add_detector_logics(
+                PluginSignalDataLogic(
+                    driver=self.driver,
+                    signal=stat.count,
+                    hinted=True
+                )
+            )
 
         self.add_detector_logics(
             PluginSignalDataLogic(
