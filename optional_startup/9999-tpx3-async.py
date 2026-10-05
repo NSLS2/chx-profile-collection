@@ -81,7 +81,7 @@ class FilePathsSignal(SignalRW[Sequence[str]]):
             name=name,
         )
 
-    async def describe(self) -> dict[str, DataKey]:
+    async def describe(self):
         datakeys = await super().describe()
         datakeys[self.name]["dtype_numpy"] = np.asarray(self.read()).dtype
         return datakeys
