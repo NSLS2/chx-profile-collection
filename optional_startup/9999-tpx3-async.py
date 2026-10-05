@@ -1,4 +1,4 @@
-from typing import Annotated as A, Sequence
+from typing import Annotated as A, Sequence, get_args, get_type_hints
 
 from ophyd_async.core import (
     PathProvider,
@@ -9,6 +9,7 @@ from ophyd_async.core import (
     SignalR,
     SignalW,
     StandardReadable,
+    Device,
     StandardReadableFormat as Format,
     StrictEnum,
 )
@@ -25,6 +26,21 @@ from ophyd_async.epics.adcore import (
 )
 
 from nslsii.ophyd_async.providers import NSLS2PathProvider
+
+def gather_config_signals(device: Device) -> Sequence[SignalR]:
+    config_signals: list[SignalR] = []
+
+    for attr_name, child in device.children():
+        annotation = get_type_hints(child, include_extras=True).get(attr_name)
+        metadata = get_args(annotation)
+
+        if isinstance(child, SignalR):
+            if Format.CONFIG_SIGNAL in metadata:
+                config_signals.append(child)
+        else:
+            config_signals.extend(gather_config_signals(child))
+
+    return config_signals
 
 class ChainMode(StrictEnum):
     NONE = "NONE"
@@ -63,10 +79,10 @@ class Tpx3AcquireLogic(ADAcquireLogic):
         await self.driver.parent.driver.update_file_template()
         await super().start_acquiring()
 
-class Tpx3ChipIO(EpicsDevice):
+class Tpx3ChipIO(EpicsDevice, StandardReadable):
 
     ikrum: A[SignalRW[float], PvSuffix("Ikrum"), Format.CONFIG_SIGNAL]
-    
+
 
 class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
@@ -103,10 +119,10 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     det_orientation: A[SignalRW[Orientation], PvSuffix.rbv("DetOrient"), Format.CONFIG_SIGNAL]
 
     # Detector chip config
-    # chip0: A[Tpx3ChipIO, PvSuffix("CHIP0")]
-    # chip1: A[Tpx3ChipIO, PvSuffix("CHIP1")]
-    # chip2: A[Tpx3ChipIO, PvSuffix("CHIP2")]
-    # chip3: A[Tpx3ChipIO, PvSuffix("CHIP3")]
+    chip0: A[Tpx3ChipIO, PvSuffix("CHIP0_")]
+    chip1: A[Tpx3ChipIO, PvSuffix("CHIP1_")]
+    chip2: A[Tpx3ChipIO, PvSuffix("CHIP2_")]
+    chip3: A[Tpx3ChipIO, PvSuffix("CHIP3_")]
 
     # BPC/DACS file config
     bpc_filepath: A[SignalRW[str], PvSuffix.rbv("BPCFilePath"), Format.CONFIG_SIGNAL]
@@ -220,6 +236,7 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
             name=name,
             plugins=plugins,
             acquire_logic=_acquire_logic,
+            config_sigs=gather_config_signals(self),
             *args,
             **kwargs
         )
