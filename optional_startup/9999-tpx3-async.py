@@ -12,6 +12,8 @@ from ophyd_async.core import (
     Device,
     StandardReadableFormat as Format,
     StrictEnum,
+    SoftSignalBackend,
+    DataKey
 )
 
 from ophyd_async.epics.core import PvSuffix, EpicsDevice
@@ -25,6 +27,7 @@ from ophyd_async.epics.adcore import (
     NDPluginFileIO,
     PluginSignalDataLogic,
 )
+import numpy as np
 
 from nslsii.ophyd_async.providers import NSLS2PathProvider
 
@@ -71,6 +74,18 @@ class Orientation(StrictEnum):
     DOWN_MIRRORED = "DOWN_MIRRORED"
     LEFT_MIRRORED = "LEFT_MIRRORED"
 
+class FilePathsSignal(SignalRW[Sequence[str]]):
+    def __init__(self, name: str = ""):
+        super().__init__(
+            SoftSignalBackend(Sequence[str]),
+            name=name,
+        )
+
+    async def describe(self) -> dict[str, DataKey]:
+        datakeys = await super().describe()
+        datakeys[self.name]["dtype_numpy"] = np.asarray(self.read()).dtype
+        return datakeys
+
 class Tpx3AcquireLogic(ADAcquireLogic):
 
     def __init__(self, driver, *args, **kwargs):
@@ -80,6 +95,7 @@ class Tpx3AcquireLogic(ADAcquireLogic):
     async def start_acquiring(self):
         await self.driver.parent.driver.update_file_template()
         await super().start_acquiring()
+
 
 class Tpx3ChipIO(EpicsDevice, StandardReadable):
     cp_pll: A[SignalR[int], PvSuffix("CP_PLL_RBV"), Format.CONFIG_SIGNAL]
@@ -219,7 +235,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
         self._uu = UUIDFilenameProvider()
         # soft signal that stores the predicted filepaths when staged
         with self.add_children_as_readables(Format.UNCACHED_SIGNAL):
-            self.raw_filepaths = soft_signal_rw(Sequence[str], initial_value=[])
+            self.raw_filepaths = FilePathsSignal()
 
         super().__init__(prefix, *args, **kwargs)
   
