@@ -100,10 +100,9 @@ class Tpx3ChipIO(EpicsDevice, StandardReadable):
     vfbk: A[SignalR[int], PvSuffix("Vfbk_RBV"), Format.CONFIG_SIGNAL]
     vth_coarse: A[SignalRW[int], PvSuffix.rbv("Vth_coarse"), Format.CONFIG_SIGNAL]
     vth_fine: A[SignalRW[int], PvSuffix.rbv("Vth_fine"), Format.CONFIG_SIGNAL]
-    adjust: A[SignalR[int], PvSuffix.rbv("Adjust_RBV"), Format.CONFIG_SIGNAL]
-    layout: A[SignalR[str], PvSuffix.rbv("Layout_RBV"), Format.CONFIG_SIGNAL]
-    temp: A[SignalR[int], PvSuffix.rbv("Temp_RBV"), Format.CONFIG_SIGNAL]
-    ikrum: A[SignalRW[int], PvSuffix("Ikrum_RBV"), Format.CONFIG_SIGNAL]
+    adjust: A[SignalR[int], PvSuffix("Adjust_RBV"), Format.CONFIG_SIGNAL]
+    layout: A[SignalR[str], PvSuffix("Layout_RBV"), Format.CONFIG_SIGNAL]
+    temp: A[SignalR[int], PvSuffix("Temp_RBV"), Format.CONFIG_SIGNAL]
 
 
 class Tpx3DriverIO(ADBaseIO, StandardReadable):
