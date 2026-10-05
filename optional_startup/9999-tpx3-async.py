@@ -30,9 +30,10 @@ from nslsii.ophyd_async.providers import NSLS2PathProvider
 
 def gather_config_signals(device: Device) -> Sequence[SignalR]:
     config_signals: list[SignalR] = []
+    annotations = get_type_hints(type(device), include_extras=True)
 
     for attr_name, child in device.children():
-        annotation = get_type_hints(child, include_extras=True).get(attr_name)
+        annotation = annotations.get(attr_name)
         metadata = get_args(annotation)
 
         if isinstance(child, SignalR):
