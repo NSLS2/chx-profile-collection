@@ -23,6 +23,7 @@ from ophyd_async.epics.adcore import (
     NDROIIO,
     NDPluginBaseIO,
     NDPluginFileIO,
+    PluginSignalDataLogic,
 )
 
 from nslsii.ophyd_async.providers import NSLS2PathProvider
@@ -236,9 +237,18 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
             name=name,
             plugins=plugins,
             acquire_logic=_acquire_logic,
-            config_sigs=gather_config_signals(self),
             *args,
             **kwargs
+        )
+
+        self.add_config_signals(*gather_config_signals(self))
+
+        self.add_detector_logics(
+            PluginSignalDataLogic(
+                driver=self.driver,
+                signal=self.driver.raw_filepaths,
+                hinted=False,
+            )
         )
 
     @AsyncStatus.wrap
