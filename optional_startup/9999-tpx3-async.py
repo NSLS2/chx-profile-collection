@@ -30,6 +30,7 @@ import numpy as np
 
 from nslsii.ophyd_async.providers import NSLS2PathProvider
 
+
 def gather_config_signals(device: Device) -> Sequence[SignalR]:
     config_signals: list[SignalR] = []
     annotations = get_type_hints(type(device), include_extras=True)
@@ -46,14 +47,17 @@ def gather_config_signals(device: Device) -> Sequence[SignalR]:
 
     return config_signals
 
+
 class ChainMode(StrictEnum):
     NONE = "NONE"
     LEADER = "LEADER"
     FOLLOWER = "FOLLOWER"
 
+
 class Polarity(StrictEnum):
     POSITIVE = "Positive"
     NEGATIVE = "Negative"
+
 
 class TDC(StrictEnum):
     P0123 = "P0123"
@@ -62,6 +66,7 @@ class TDC(StrictEnum):
     P0 = "P0"
     N0 = "N0"
     PN0 = "PN0"
+
 
 class Orientation(StrictEnum):
     UP = "UP"
@@ -72,6 +77,7 @@ class Orientation(StrictEnum):
     RIGHT_MIRRORED = "RIGHT_MIRRORED"
     DOWN_MIRRORED = "DOWN_MIRRORED"
     LEFT_MIRRORED = "LEFT_MIRRORED"
+
 
 class FilePathsSignal(SignalRW[Sequence[str]]):
     def __init__(self, name: str = ""):
@@ -88,6 +94,7 @@ class FilePathsSignal(SignalRW[Sequence[str]]):
                 datakeys[self.name]["dtype_numpy"] = str(np.asarray(val['value']).dtype)
 
         return datakeys
+
 
 class Tpx3AcquireLogic(ADAcquireLogic):
 
@@ -228,9 +235,10 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
 
         # predict what the future filepaths will be
         num_images = await self.num_images.get_value()
-        filenames = [f'{"file:" + self._write_path}{self._res_uid}_{self._n:05d}_{j:06d}.tpx3' for j in range(num_images)] # TODO pretty sure we can remove 'file:' here
-        self._n += 1
+        filenames = [f'{"file:" + self._write_path}/{self._res_uid}_{self._n:05d}_{j:06d}.tpx3' for j in range(num_images)] # TODO pretty sure we can remove 'file:' here
         await self.raw_filepaths.set(filenames)
+
+        self._n += 1
 
     def __init__(self, prefix: str, path_provider: PathProvider, det_name: str, *args, **kwargs):
         self._path_provider = path_provider
@@ -243,6 +251,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
         super().__init__(prefix, *args, **kwargs)
   
         self._n = 0
+
 
 class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
 
