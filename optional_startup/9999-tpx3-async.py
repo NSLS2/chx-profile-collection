@@ -82,7 +82,11 @@ class FilePathsSignal(SignalRW[Sequence[str]]):
 
     async def describe(self):
         datakeys = await super().describe()
-        datakeys[self.name]["dtype_numpy"] = np.dtype('<U118')
+        ret_dict = await self.read()
+        for val in ret_dict.values():
+            if isinstance(val, dict) and 'value' in val:
+                datakeys[self.name]["dtype_numpy"] = str(np.asarray(val['value']).dtype)
+
         return datakeys
 
 class Tpx3AcquireLogic(ADAcquireLogic):
