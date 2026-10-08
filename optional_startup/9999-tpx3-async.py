@@ -12,6 +12,7 @@ from ophyd_async.core import (
     StandardReadableFormat as Format,
     StrictEnum,
     SoftSignalBackend,
+    init_devices,
 )
 
 from ophyd_async.epics.core import PvSuffix, EpicsDevice
@@ -243,7 +244,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
         self._uu = UUIDFilenameProvider()
         # soft signal that stores the predicted filepaths when staged
         with self.add_children_as_readables(Format.UNCACHED_SIGNAL):
-            self.raw_filepaths = FilePathsSignal(name="tpx3_files_raw_filepaths")
+            self.raw_filepaths = FilePathsSignal()
 
         super().__init__(prefix, *args, **kwargs)
   
@@ -261,7 +262,8 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
         *args,
         **kwargs
     ):
-        driver = Tpx3DriverIO(prefix + driver_suffix, path_provider, name)
+        assets_name = kwargs.get("assets_name", "timepix")
+        driver = Tpx3DriverIO(prefix + driver_suffix, path_provider, assets_name)
         _acquire_logic = Tpx3AcquireLogic(driver)
 
         plugins: dict[str, NDPluginBaseIO] = {
@@ -285,6 +287,9 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
             *args,
             **kwargs
         )
+
+        # rename the raw_filepaths signal to match ophyd sync
+        self.driver.raw_filepaths.set_name("files_raw_filepaths")
 
         # gather and add all config signals
         self.add_config_signals(*gather_config_signals(self))
@@ -322,4 +327,9 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
 
 pp = NSLS2PathProvider(RE.md)
 
-tpx3_1 = Tpx3Detector("XF:11ID1-ES{TPX:1}", path_provider=pp, name="timepix-1")
+
+async with init_devices(child_name_separator="_"):
+    tpx3_1 = Tpx3Detector("XF:11ID1-ES{TPX:1}", path_provider=pp, assets_name="timepix-1")
+
+
+   
