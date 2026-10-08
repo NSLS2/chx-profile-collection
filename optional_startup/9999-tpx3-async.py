@@ -4,7 +4,6 @@ from ophyd_async.core import (
     PathProvider,
     UUIDFilenameProvider,
     AsyncStatus,
-    soft_signal_rw,
     SignalRW,
     SignalR,
     SignalW,
@@ -132,7 +131,6 @@ class Tpx3ChipIO(EpicsDevice, StandardReadable):
 
 
 class Tpx3DriverIO(ADBaseIO, StandardReadable):
-
     # Detector health
     local_temp: A[SignalR[float], PvSuffix("LocalTemp_RBV"), Format.CONFIG_SIGNAL]
     fpga_temp: A[SignalR[float], PvSuffix("FPGATemp_RBV"), Format.CONFIG_SIGNAL]
@@ -181,7 +179,6 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     dacs_filename: A[SignalRW[str], PvSuffix.rbv("DACSFileName"), Format.CONFIG_SIGNAL]
     dacs_filepath_exists: A[SignalR[bool], PvSuffix("DACSFilePathExists_RBV"), Format.CONFIG_SIGNAL]
     dacs_write_file: A[SignalRW[bool], PvSuffix("WriteDACSFile")]
-
 
     write_file_msg: A[SignalR[str], PvSuffix("WriteFileMessage")]
 
@@ -246,7 +243,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
         self._uu = UUIDFilenameProvider()
         # soft signal that stores the predicted filepaths when staged
         with self.add_children_as_readables(Format.UNCACHED_SIGNAL):
-            self.raw_filepaths = FilePathsSignal()
+            self.raw_filepaths = FilePathsSignal(name="tpx3_files_raw_filepaths")
 
         super().__init__(prefix, *args, **kwargs)
   
