@@ -4,6 +4,7 @@ from bluesky import RunEngine
 import time
 from redis_json_dict import RedisJSONDict
 from tiled.client import from_profile
+from bluesky_tiled_plugins.writing.tiled_writer import TiledWriter
 from ophyd.signal import EpicsSignalBase
 from databroker import Broker
 
@@ -14,7 +15,9 @@ from IPython.terminal.prompts import Prompts, Token
 
 # Configure a Tiled writing client
 tiled_writing_client = from_profile("nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_CHX"])["chx"]["raw"]
+tiled_writing_client_sql = from_profile("nsls2", api_key=os.environ["TILED_BLUESKY_WRITING_API_KEY_CHX"])["chx"]["migration"]
 tiled_writing_client.context.http_client.headers['tiled-qos'] = 'acquisition'
+tiled_writing_client_sql.context.http_client.headers['tiled-qos'] = 'acquisition'
 
 
 class TiledInserter:
@@ -39,6 +42,12 @@ class TiledInserter:
 
 
 tiled_inserter = TiledInserter()
+tiled_writer = TiledWriter(
+    tiled_writing_client_sql,
+    backup_directory="/tmp/tiled_backup",
+    batch_size=1,
+    max_array_size=0,
+)
 
 nslsii.configure_base(get_ipython().user_ns,
                       tiled_inserter,
@@ -47,6 +56,7 @@ nslsii.configure_base(get_ipython().user_ns,
                       redis_ssl=True,
                       publish_documents_with_kafka=True)
 
+RE.subscribe(tiled_writer)
 print("Initializing Tiled reading client...\nMake sure you check for duo push.")
 tiled_reading_client = from_profile("nsls2", username=None, include_data_sources=True)["chx"]["raw"]
 tiled_reading_client.context.http_client.headers['tiled-qos'] = 'acquisition'

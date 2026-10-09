@@ -614,41 +614,6 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
 
         return st
 
-class CHXVimbaDetector(VimbaDetector):
-    """Vimba step-scan detector with HDF and five statistics totals."""
-
-    def __init__(self, prefix, path_provider, name):
-        plugins = {
-            f"stats{i}": NDStatsIO(f"{prefix}Stats{i}:")
-            for i in range(1, 6)
-        }
-        super().__init__(
-            prefix,
-            ADWriterFactory.hdf(path_provider, datakey_suffix="_image"),
-            plugins=plugins,
-            name=name,
-        )
-        # Keep the existing field names used by CHX plotting/analysis code.
-        self.set_name(name, child_name_separator="_")
-        for plugin in plugins.values():
-            self.add_detector_logics(PluginSignalDataLogic(self.driver, plugin.total))
-
-    @property
-    def hints(self):
-        return {"fields": [self.stats1.total.name]}
-
-    @AsyncStatus.wrap
-    async def stage(self):
-        await super().stage()
-        await self.driver.wait_for_plugins.set(True)
-        await self.hdf.enable_callbacks.set(EnableDisable.ENABLE)
-        for i in range(1, 6):
-            plugin = getattr(self, f"stats{i}")
-            await asyncio.gather(
-                plugin.enable_callbacks.set(EnableDisable.ENABLE),
-                plugin.compute_statistics.set(True),
-            )
-
 
 def xray_eye3_path_provider(datakey_name=None):
     # Resolve the proposal at acquisition time, since RE.md can change after startup.
@@ -665,12 +630,26 @@ xray_eye1 = StandardProsilicaV33('XF:11IDA-BI{Bpm:1-Cam:1}', name='xray_eye1')
 time.sleep(.1) # added by LW 7/7/25 
 xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 time.sleep(.1) # added by LW 7/7/25 
-with init_devices():
-    xray_eye3 = CHXVimbaDetector(
-        "XF:11IDB-BI{Cam:08}",
-        path_provider=xray_eye3_path_provider,
+with init_devices(child_name_separator="_"):
+    prefix = "XF:11IDB-BI{Cam:08}"
+    xray_eye3 = VimbaDetector(
+        prefix,
+        ADWriterFactory.hdf(xray_eye3_path_provider, datakey_suffix="_image"),
         name='xray_eye3',
+        plugins={
+            f"stats{i}": NDStatsIO(f"{prefix}Stats{i}:")
+            for i in range(1, 6)
+        },
     )
+    xray_eye3_data_logics = [
+        PluginSignalDataLogic(xray_eye3.driver, xray_eye3.stats1.total),
+        PluginSignalDataLogic(xray_eye3.driver, xray_eye3.stats2.total),
+        PluginSignalDataLogic(xray_eye3.driver, xray_eye3.stats3.total),
+        PluginSignalDataLogic(xray_eye3.driver, xray_eye3.stats4.total),
+        PluginSignalDataLogic(xray_eye3.driver, xray_eye3.stats5.total),
+    ]
+    xray_eye3.add_detector_logics(*xray_eye3_data_logics)
+
 xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 time.sleep(.1) # added by LW 7/7/25 
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
