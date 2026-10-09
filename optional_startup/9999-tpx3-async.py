@@ -327,9 +327,7 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
 
 pp = NSLS2PathProvider(RE.md)
 
-
 with init_devices(child_name_separator="_"):
     tpx3_1 = Tpx3Detector("XF:11ID1-ES{TPX:1}", path_provider=pp, assets_name="timepix-1")
 
-
-   
+tpx3_1.driver.raw_filepaths.set_name(f"{tpx3_1}_files_raw_filepaths") 
