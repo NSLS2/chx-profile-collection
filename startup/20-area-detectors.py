@@ -615,7 +615,7 @@ class EigerManualTrigger(SingleTrigger, EigerBase):
         return st
 
 class CHXVimbaDetector(VimbaDetector):
-    """Vimba step-scan detector with TIFF images and five statistics totals."""
+    """Vimba step-scan detector with HDF and five statistics totals."""
 
     def __init__(self, prefix, path_provider, name):
         plugins = {
@@ -624,7 +624,7 @@ class CHXVimbaDetector(VimbaDetector):
         }
         super().__init__(
             prefix,
-            ADWriterFactory.tiff(path_provider, datakey_suffix="_image"),
+            ADWriterFactory.hdf(path_provider, datakey_suffix="_image"),
             plugins=plugins,
             name=name,
         )
@@ -641,7 +641,7 @@ class CHXVimbaDetector(VimbaDetector):
     async def stage(self):
         await super().stage()
         await self.driver.wait_for_plugins.set(True)
-        await self.tiff.enable_callbacks.set(EnableDisable.ENABLE)
+        await self.hdf.enable_callbacks.set(EnableDisable.ENABLE)
         for i in range(1, 6):
             plugin = getattr(self, f"stats{i}")
             await asyncio.gather(
@@ -667,7 +667,7 @@ xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 time.sleep(.1) # added by LW 7/7/25 
 with init_devices():
     xray_eye3 = CHXVimbaDetector(
-        "XF:11IDB-BI{Cam:08}",
+        "XF:11IDB-BI{Cam:08}",0
         path_provider=xray_eye3_path_provider,
         name='xray_eye3',
     )
