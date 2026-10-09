@@ -328,7 +328,7 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
 pp = NSLS2PathProvider(RE.md)
 
 
-async with init_devices(child_name_separator="_"):
+with init_devices(child_name_separator="_"):
     tpx3_1 = Tpx3Detector("XF:11ID1-ES{TPX:1}", path_provider=pp, assets_name="timepix-1")
 
 
