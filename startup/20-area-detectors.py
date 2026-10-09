@@ -635,7 +635,6 @@ with init_devices(child_name_separator="_"):
     xray_eye3 = VimbaDetector(
         prefix,
         ADWriterFactory.hdf(xray_eye3_path_provider, datakey_suffix="_image"),
-        name='xray_eye3',
         plugins={
             f"stats{i}": NDStatsIO(f"{prefix}Stats{i}:")
             for i in range(1, 6)
