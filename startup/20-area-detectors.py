@@ -667,7 +667,7 @@ xray_eye2 = StandardProsilicaV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 time.sleep(.1) # added by LW 7/7/25 
 with init_devices():
     xray_eye3 = CHXVimbaDetector(
-        "XF:11IDB-BI{Cam:08}",0
+        "XF:11IDB-BI{Cam:08}",
         path_provider=xray_eye3_path_provider,
         name='xray_eye3',
     )
