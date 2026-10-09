@@ -262,7 +262,7 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
         *args,
         **kwargs
     ):
-        assets_name = kwargs.get("assets_name", "timepix")
+        assets_name = kwargs.pop("assets_name", "timepix")
         driver = Tpx3DriverIO(prefix + driver_suffix, path_provider, assets_name)
         _acquire_logic = Tpx3AcquireLogic(driver)
 
