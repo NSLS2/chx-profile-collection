@@ -649,6 +649,18 @@ with init_devices(child_name_separator="_"):
     ]
     xray_eye3.add_detector_logics(*xray_eye3_data_logics)
 
+    xray_eye3_writing = VimbaDetector(
+        prefix,
+        plugins={
+            f"stats{i}": NDStatsIO(f"{prefix}Stats{i}:")
+            for i in range(1, 6)
+        },
+    )
+
+    xray_eye3_writing.add_detector_logics(*xray_eye3_data_logics)
+    xray_eye3_writing.set_name("xray_eye3", child_name_separator="_")
+    
+
 xray_eye4 = StandardProsilicaV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 time.sleep(.1) # added by LW 7/7/25 
 OAV = StandardProsilicaV33('XF:11IDB-BI{Cam:10}', name='OAV')  # beamline OAV using prosilica camera
@@ -663,7 +675,6 @@ time.sleep(.1) # added by LW 7/7/25
 xray_eye2_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Mon:1-Cam:1}', name='xray_eye2')
 time.sleep(.1) # added by LW 7/7/25 
 # Both names use the same detector; Vimba counts include TIFF images and totals.
-xray_eye3_writing = xray_eye3
 xray_eye4_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:09}', name='xray_eye4')
 time.sleep(.1) # added by LW 7/7/25 
 OAV_writing = StandardProsilicaWithTIFFV33('XF:11IDB-BI{Cam:10}', name='OAV')   # beamline OAV using prosilica camera
