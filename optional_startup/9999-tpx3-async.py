@@ -460,4 +460,37 @@ if globals().get("tpx3_2"):
 
 ## CHX Specific Utilities ##
 async def init_timepix_settings(tpx3: Tpx3Detector):
-    ...
+    if tpx3.prefix.contains("TPX:1"):
+        assets_name = "timepix-1"
+    else:
+        assets_name = "timepix-2"
+    
+    bpc_filepath = f"/nsls2/data/chx/shared/CHX_Setup/timepix/{assets_name}/configs/equalization_may_2023/"
+    bpc_filename = "Eq_cfg.bpc"
+    dacs_filepath = f"/nsls2/data/chx/shared/CHX_Setup/timepix/{assets_name}/configs/equalization_may_2023/"
+    dacs_filename = "Eq_cfg.bpc.dacs"
+
+    # write bpc
+    await tpx3.driver.bpc_filepath.set(bpc_filepath)
+    await tpx3.driver.bpc_filename.set(bpc_filename)
+    await tpx3.driver.bpc_write_file.set(True)
+
+    # write dacs
+    await tpx3.driver.dacs_filepath.set(dacs_filepath)
+    await tpx3.driver.dacs_filename.set(dacs_filename)
+    await tpx3.driver.dacs_write_file.set(True)
+
+    # set configurations
+    await tpx3.driver.bias_voltage.set(100)
+    await tpx3.driver.bias_enable.set(True)
+    await tpx3.driver.global_ts_interval.set(0.1)
+    await tpx3.driver.trigger_mode()
+
+    # set filewriter configs
+    await tpx3.driver.prv_filepath.set("http://localhost")
+    await tpx3.driver.prv_write_enable.set(True)
+    await tpx3.driver.raw_write_enable.set(False)
+    await tpx3.driver.raw1_write_enable.set(False)
+    await tpx3.driver.img_write_enable.set(True)
+    await tpx3.driver.img1_write_enable.set(True)
+    await tpx3.driver.set_settings.set(True)
