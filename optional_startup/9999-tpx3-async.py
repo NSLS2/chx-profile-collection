@@ -16,7 +16,7 @@ from ophyd_async.core import (
     NotConnectedError,
 )
 
-from ophyd_async.epics.core import PvSuffix, EpicsDevice
+from ophyd_async.epics.core import PvSuffix, EpicsDevice, EpicsOptions
 from ophyd_async.epics.adcore import (
     AreaDetector,
     ADBaseIO,
@@ -245,11 +245,11 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     bpc_filepath: A[SignalRW[str], PvSuffix.rbv("BPCFilePath"), Format.CONFIG_SIGNAL]
     bpc_filename: A[SignalRW[str], PvSuffix.rbv("BPCFileName"), Format.CONFIG_SIGNAL]
     bpc_filepath_exists: A[SignalR[bool], PvSuffix("BPCFilePathExists_RBV"), Format.CONFIG_SIGNAL]
-    bpc_write_file: A[SignalRW[bool], PvSuffix("WriteBPCFile")]
+    bpc_write_file: A[SignalRW[bool], PvSuffix("WriteBPCFile"), EpicsOptions(wait=False)]
     dacs_filepath: A[SignalRW[str], PvSuffix.rbv("DACSFilePath"), Format.CONFIG_SIGNAL]
     dacs_filename: A[SignalRW[str], PvSuffix.rbv("DACSFileName"), Format.CONFIG_SIGNAL]
     dacs_filepath_exists: A[SignalR[bool], PvSuffix("DACSFilePathExists_RBV"), Format.CONFIG_SIGNAL]
-    dacs_write_file: A[SignalRW[bool], PvSuffix("WriteDACSFile")]
+    dacs_write_file: A[SignalRW[bool], PvSuffix("WriteDACSFile"), EpicsOptions(wait=False)]
     write_file_msg: A[SignalR[str], PvSuffix("WriteFileMessage")]
 
     # Filepath logic
@@ -473,12 +473,12 @@ async def init_timepix_settings(tpx3: Tpx3Detector):
     # write bpc
     await tpx3.driver.bpc_filepath.set(bpc_filepath)
     await tpx3.driver.bpc_filename.set(bpc_filename)
-    # await tpx3.driver.bpc_write_file.set(True)
+    await tpx3.driver.bpc_write_file.set(True)
 
     # write dacs
     await tpx3.driver.dacs_filepath.set(dacs_filepath)
     await tpx3.driver.dacs_filename.set(dacs_filename)
-    # await tpx3.driver.dacs_write_file.set(True)
+    await tpx3.driver.dacs_write_file.set(True)
 
     # set configurations
     await tpx3.driver.bias_voltage.set(100)
