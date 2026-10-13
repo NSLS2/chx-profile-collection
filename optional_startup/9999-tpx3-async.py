@@ -69,6 +69,15 @@ class TDC(StrictEnum):
     PN0 = "PN0"
 
 
+class TriggerSelection(StrictEnum):
+    ZERO = "0"
+    ONE = "1"
+    TWO = "2"
+    THREE = "3"
+    FOUR = "4"
+    FIVE = "5"
+    SIX = "6"
+
 class Orientation(StrictEnum):
     UP = "UP"
     RIGHT = "RIGHT"
@@ -150,7 +159,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     serval_connected: A[SignalR[bool], PvSuffix("ServalConnected_RBV"), Format.CONFIG_SIGNAL]
     det_connected: A[SignalR[bool], PvSuffix("DetConnected_RBV"), Format.CONFIG_SIGNAL]
     free_space: A[SignalR[float], PvSuffix("FreeSpace_RBV"), Format.CONFIG_SIGNAL]
-    disk_lim_reach: A[SignalR[float], PvSuffix("DiskLimReach_RBV"), Format.CONFIG_SIGNAL]
+    disk_lim_reach: A[SignalR[bool], PvSuffix("DiskLimReach_RBV"), Format.CONFIG_SIGNAL]
     disk_low_limit: A[SignalR[int], PvSuffix("DiskLowLimit_RBV"), Format.CONFIG_SIGNAL]
     write_speed: A[SignalR[float], PvSuffix("WriteSpeed_RBV"), Format.CONFIG_SIGNAL]
 
@@ -172,7 +181,7 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     http_code: A[SignalR[int], PvSuffix("HttpCode_RBV"), Format.CONFIG_SIGNAL]
     iface: A[SignalR[str], PvSuffix("Iface_RBV"), Format.CONFIG_SIGNAL]
     sw_ver: A[SignalR[str], PvSuffix("SW_ver_RBV"), Format.CONFIG_SIGNAL]
-    pix_count: A[SignalR[str], PvSuffix("PixCount_RBV"), Format.CONFIG_SIGNAL]
+    pix_count: A[SignalR[int], PvSuffix("PixCount_RBV"), Format.CONFIG_SIGNAL]
     row_len: A[SignalR[int], PvSuffix("RowLen_RBV"), Format.CONFIG_SIGNAL]
     nchips: A[SignalR[int], PvSuffix("NChips_RBV"), Format.CONFIG_SIGNAL]
     nrows: A[SignalR[int], PvSuffix("NRows_RBV"), Format.CONFIG_SIGNAL]
@@ -209,8 +218,8 @@ class Tpx3DriverIO(ADBaseIO, StandardReadable):
     bias_voltage: A[SignalRW[int], PvSuffix.rbv("BiasVolt"), Format.CONFIG_SIGNAL]
     bias_enable: A[SignalRW[bool], PvSuffix.rbv("BiasEnbl"), Format.CONFIG_SIGNAL]
     chain_mode: A[SignalRW[ChainMode], PvSuffix.rbv("ChainMode"), Format.CONFIG_SIGNAL]
-    trigger_in: A[SignalRW[int], PvSuffix.rbv("TriggerIn"), Format.CONFIG_SIGNAL]
-    trigger_out: A[SignalRW[int], PvSuffix.rbv("TriggerOut"), Format.CONFIG_SIGNAL]
+    trigger_in: A[SignalRW[TriggerSelection], PvSuffix.rbv("TriggerIn"), Format.CONFIG_SIGNAL]
+    trigger_out: A[SignalRW[TriggerSelection], PvSuffix.rbv("TriggerOut"), Format.CONFIG_SIGNAL]
     polarity: A[SignalRW[Polarity], PvSuffix.rbv("Polarity"), Format.CONFIG_SIGNAL]
     trigger_modec: A[SignalR[str], PvSuffix("TriggerModeC_RBV"), Format.CONFIG_SIGNAL]
     exposure_time: A[SignalR[float], PvSuffix("ExposureTime_RBV"), Format.CONFIG_SIGNAL]
