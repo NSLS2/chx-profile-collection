@@ -460,7 +460,7 @@ if globals().get("tpx3_2"):
 
 ## CHX Specific Utilities ##
 async def init_timepix_settings(tpx3: Tpx3Detector):
-    if tpx3.name.contains("1"):
+    if tpx3.name == "tpx3_1":
         assets_name = "timepix-1"
     else:
         assets_name = "timepix-2"
