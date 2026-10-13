@@ -436,10 +436,10 @@ try:
             assets_name="timepix-2")
         
         for j in range(1, 5):
-            stat = getattr(tpx3_1, f"stats{j}")
-            tpx3_1.add_detector_logics(
+            stat = getattr(tpx3_2, f"stats{j}")
+            tpx3_2.add_detector_logics(
                 PluginSignalDataLogic(
-                    driver=tpx3_1.driver,
+                    driver=tpx3_2.driver,
                     signal=stat.total,
                     hinted=True
                 )
