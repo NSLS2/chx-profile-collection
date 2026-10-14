@@ -467,7 +467,7 @@ async def init_timepix_settings(tpx3: Tpx3Detector):
     
     bpc_filepath = f"/nsls2/data/chx/shared/CHX_Setup/timepix/{assets_name}/configs/equalization_may_2023/"
     bpc_filename = "Eq_cfg.bpc"
-    dacs_filepath = f"/nsls2/data/chx/shared/CHX_Setup/timepix/{assets_name}/configs/equalization_may_2023/"
+    dacs_filepath = f"/nsls2/data/chx/shared/CHX_Setup/timepix/{assets_name}/configs/ikrum_10/"
     dacs_filename = "Eq_cfg.bpc.dacs"
 
     # write bpc
@@ -487,7 +487,7 @@ async def init_timepix_settings(tpx3: Tpx3Detector):
 
     # set filewriter configs
     await tpx3.driver.prv_filepath.set("http://localhost")
-    await tpx3.driver.prv_write_enable.set(False)
+    await tpx3.driver.prv_write_enable.set(True)
     await tpx3.driver.raw_write_enable.set(False)
     await tpx3.driver.raw1_write_enable.set(False)
     await tpx3.driver.img_write_enable.set(False)
