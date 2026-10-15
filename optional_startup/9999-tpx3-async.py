@@ -1,4 +1,5 @@
 from typing import Annotated as A, Sequence, get_args, get_type_hints
+import dataclasses
 
 from ophyd_async.core import (
     PathProvider,
@@ -386,7 +387,63 @@ class Tpx3Detector(AreaDetector[Tpx3DriverIO]):
         await self.driver.uninit_file_writing()
         await super().unstage()
 
+## CHX Specific Utilities ##
 
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+from types import MethodType
+import json
+
+from bluesky.run_engine import call_in_bluesky_event_loop
+
+@dataclass(frozen=True)
+class Tpx3Mode():
+    bpc_filepath: str | Path
+    bpc_filename: str | Path
+    dacs_filepath: str | Path
+    dacs_filename: str | Path
+    bias_voltage: int = 100
+    global_ts_interval: float = 0.1
+
+class Tpx3Modes(Enum):
+    IKRUM3 =  "IKRUM3"
+    IKRUM10 = "IKRUM10"
+    IKRUM20 = "IKRUM20"
+
+async def set_mode(self: Tpx3Detector, mode_name: Tpx3Modes):
+    if mode_name not in self.modes:
+        print(f"{self.name} does not have mode {mode_name}")
+
+    mode = self.modes[mode_name]
+    # write bpc
+    await self.driver.bpc_filepath.set(mode.bpc_filepath)
+    await self.driver.bpc_filename.set(mode.bpc_filename)
+    await self.driver.bpc_write_file.set(True)
+
+    # write dacs
+    await self.driver.dacs_filepath.set(mode.dacs_filepath)
+    await self.driver.dacs_filename.set(mode.dacs_filename)
+    await self.driver.dacs_write_file.set(True)
+
+    # set configurations
+    await self.driver.bias_voltage.set(mode.bias_voltage)
+    await self.driver.bias_enable.set(True)
+    await self.driver.global_ts_interval.set(mode.global_ts_interval)
+
+    # set filewriter configs
+    await self.driver.prv_filepath.set("http://localhost")
+    await self.driver.prv_write_enable.set(True)
+    await self.driver.raw_write_enable.set(False)
+    await self.driver.raw1_write_enable.set(False)
+    await self.driver.img_write_enable.set(False)
+    await self.driver.img1_write_enable.set(False)
+    await self.driver.set_settings.set(True)
+
+# do this to avoid putting CHX specific code in the ophyd implementation
+Tpx3Detector.set_mode = set_mode
+
+# CHX Detector Setup
 pp = NSLS2PathProvider(RE.md)
 
 try:
@@ -444,6 +501,7 @@ try:
                     hinted=True
                 )
             )
+
 except NotConnectedError as exc:
     failed = [
         name for name in ("tpx3_1", "tpx3_2") if name in exc.sub_errors
@@ -457,39 +515,13 @@ if globals().get("tpx3_1"):
 if globals().get("tpx3_2"):
     tpx3_2.driver.raw_filepaths.set_name(f"{tpx3_2.name}_files_raw_filepaths")
 
+# plug modes
+tpx3_config_filepath = "/nsls2/data/chx/CHX_Shared/timepix/"
+tpx3_1_modes = {"IKRUM10": Tpx3Mode(**(json.loads(Path(f"{tpx3_config_filepath}/timepix-1/mode_ikrum10.json").read_text())))}
+tpx3_2_modes = {"IKRUM10": Tpx3Mode(**(json.loads(Path(f"{tpx3_config_filepath}/timepix-2/mode_ikrum10.json").read_text())))}
+setattr(tpx3_1, "modes", Enum("Tpx3Modes", {"IKRUM10": tpx3_1_modes["IKRUM10"]}))
+setattr(tpx3_2, "modes", Enum("Tpx3Modes", {"IKRUM10": tpx3_2_modes["IKRUM10"]}))
 
-## CHX Specific Utilities ##
-async def init_timepix_settings(tpx3: Tpx3Detector):
-    if tpx3.name == "tpx3_1":
-        assets_name = "timepix-1"
-    else:
-        assets_name = "timepix-2"
-    
-    bpc_filepath = f"/nsls2/data/chx/shared/CHX_Setup/timepix/{assets_name}/configs/equalization_may_2023/"
-    bpc_filename = "Eq_cfg.bpc"
-    dacs_filepath = f"/nsls2/data/chx/shared/CHX_Setup/timepix/{assets_name}/configs/ikrum_10/"
-    dacs_filename = "Eq_cfg.bpc.dacs"
-
-    # write bpc
-    await tpx3.driver.bpc_filepath.set(bpc_filepath)
-    await tpx3.driver.bpc_filename.set(bpc_filename)
-    await tpx3.driver.bpc_write_file.set(True)
-
-    # write dacs
-    await tpx3.driver.dacs_filepath.set(dacs_filepath)
-    await tpx3.driver.dacs_filename.set(dacs_filename)
-    await tpx3.driver.dacs_write_file.set(True)
-
-    # set configurations
-    await tpx3.driver.bias_voltage.set(100)
-    await tpx3.driver.bias_enable.set(True)
-    await tpx3.driver.global_ts_interval.set(0.1)
-
-    # set filewriter configs
-    await tpx3.driver.prv_filepath.set("http://localhost")
-    await tpx3.driver.prv_write_enable.set(True)
-    await tpx3.driver.raw_write_enable.set(False)
-    await tpx3.driver.raw1_write_enable.set(False)
-    await tpx3.driver.img_write_enable.set(False)
-    await tpx3.driver.img1_write_enable.set(False)
-    await tpx3.driver.set_settings.set(True)
+# initialize with default mode (ikrum 10)
+call_in_bluesky_event_loop(tpx3_1.set_mode(Tpx3Modes.IKRUM10))
+call_in_bluesky_event_loop(tpx3_2.set_mode(Tpx3Modes.IKRUM10))
