@@ -412,10 +412,10 @@ class Tpx3Modes(Enum):
     IKRUM20 = "IKRUM20"
 
 async def set_mode(self: Tpx3Detector, mode_name: Tpx3Modes):
-    if mode_name not in self.modes:
-        print(f"{self.name} does not have mode {mode_name}")
+    if mode_name.value not in self.modes:
+        print(f"{self.name} does not have mode {mode_name.value}")
 
-    mode = self.modes[mode_name]
+    mode = self.modes[mode_name.value]
     # write bpc
     await self.driver.bpc_filepath.set(mode.bpc_filepath)
     await self.driver.bpc_filename.set(mode.bpc_filename)
