@@ -516,7 +516,7 @@ if globals().get("tpx3_2"):
     tpx3_2.driver.raw_filepaths.set_name(f"{tpx3_2.name}_files_raw_filepaths")
 
 # plug modes
-tpx3_config_filepath = "/nsls2/data/chx/CHX_Shared/timepix/"
+tpx3_config_filepath = "/nsls2/data/chx/shared/CHX_Shared/timepix/"
 tpx3_1_modes = {"IKRUM10": Tpx3Mode(**(json.loads(Path(f"{tpx3_config_filepath}/timepix-1/mode_ikrum10.json").read_text())))}
 tpx3_2_modes = {"IKRUM10": Tpx3Mode(**(json.loads(Path(f"{tpx3_config_filepath}/timepix-2/mode_ikrum10.json").read_text())))}
 setattr(tpx3_1, "modes", Enum("Tpx3Modes", {"IKRUM10": tpx3_1_modes["IKRUM10"]}))
