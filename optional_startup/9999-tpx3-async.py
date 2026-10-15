@@ -412,10 +412,10 @@ class Tpx3Modes(Enum):
     IKRUM20 = "IKRUM20"
 
 async def set_mode(self: Tpx3Detector, mode_name: Tpx3Modes):
-    if mode_name.value not in self.modes:
+    if mode_name not in self.modes:
         print(f"{self.name} does not have mode {mode_name.value}")
 
-    mode = self.modes[mode_name.value]
+    mode = self.modes[mode_name]
     # write bpc
     await self.driver.bpc_filepath.set(mode.bpc_filepath)
     await self.driver.bpc_filename.set(mode.bpc_filename)
@@ -519,8 +519,8 @@ if globals().get("tpx3_2"):
 tpx3_config_filepath = "/nsls2/data/chx/shared/CHX_Setup/timepix/"
 tpx3_1_modes = {"IKRUM10": Tpx3Mode(**(json.loads(Path(f"{tpx3_config_filepath}/timepix-1/mode_ikrum10.json").read_text())))}
 tpx3_2_modes = {"IKRUM10": Tpx3Mode(**(json.loads(Path(f"{tpx3_config_filepath}/timepix-2/mode_ikrum10.json").read_text())))}
-setattr(tpx3_1, "modes", Enum("Tpx3Modes", {"IKRUM10": tpx3_1_modes["IKRUM10"]}))
-setattr(tpx3_2, "modes", Enum("Tpx3Modes", {"IKRUM10": tpx3_2_modes["IKRUM10"]}))
+setattr(tpx3_1, "modes", {Tpx3Modes.IKRUM10: tpx3_1_modes["IKRUM10"]})
+setattr(tpx3_2, "modes", {Tpx3Modes.IKRUM10: tpx3_2_modes["IKRUM10"]})
 
 # initialize with default mode (ikrum 10)
 call_in_bluesky_event_loop(tpx3_1.set_mode(Tpx3Modes.IKRUM10))
