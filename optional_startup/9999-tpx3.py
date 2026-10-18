@@ -1,15 +1,13 @@
-from pathlib import PurePath
 from datetime import datetime
 from typing import List
 
 import numpy as np
 
 from ophyd.areadetector.detectors import AreaDetector
-from ophyd.areadetector.cam import AreaDetectorCam
 from ophyd.areadetector.paths import EpicsPathSignal
 from ophyd.areadetector.base import EpicsSignalWithRBV
 from ophyd.areadetector.plugins import StatsPlugin_V34, ROIPlugin_V34, TimeSeriesPlugin_V34
-from ophyd.areadetector.filestore_mixins import new_short_uid, FileStoreBase
+from ophyd.areadetector.filestore_mixins import new_short_uid
 from ophyd.signal import EpicsSignal
 from ophyd import Component as Cpt, Device
 
@@ -20,10 +18,7 @@ from nslsii.ad33 import SingleTriggerV33
 class PreciseDtypeSignal(Signal):
     def describe(self):
         ret = super().describe()
-        ret[self.name].setdefault('dtype_str',
-                                  str(np.asarray(self.get()).dtype)
-
-        )
+        ret[self.name].setdefault('dtype_str', str(np.asarray(self.get()).dtype))
         return ret
 
 class Tpx3Files(Device):
@@ -70,7 +65,7 @@ class Tpx3Files(Device):
         # TODO also do the images
         
         self._res_uid = res_uid = new_short_uid()
-        write_path_template = "file:" + assets_path() + "timepix-1/%Y/%m/%d/"
+        write_path_template = "file:" + assets_path() + f"{self.parent.assets_name}/%Y/%m/%d/"
         self._write_path = write_path = datetime.now().strftime(write_path_template)
         self.raw_filepath.set(write_path).wait()
 
@@ -89,15 +84,12 @@ class Tpx3Files(Device):
         
         super().stage()
 
-
-
     def update_file_template(self):
         # The server generates files with in a trigger that are formatted as
         # filepath/template{datetime only}_{j:d6}.tpx3
         # however the counting is only within the trigger and because we want to be able to predict the file names we can not
         # rely on the date formatting, this we need to set this template on every trigger
 
-        
         # TODO check what the % formatting means to the server
         self.raw_file_template.set(f"{self._res_uid}_{self._n:05d}_").wait()
         # because we need to flush setting to actual server from IOC
@@ -111,12 +103,7 @@ class Tpx3Files(Device):
         # TODO reset these to their original values rather than junk
         self.raw_filepath.set('file:/media/nvme/raw/').wait()
         self.raw_file_template.set(f"garbage").wait()
-        # self.raw_write_enable.set(0).wait()
-        print("put complete: ", self.raw_write_enable.put_complete)
-        # self.raw_write_enable.put(0)
         self.raw_write_enable.set(0).wait()
-        # caput("XF:11ID1-ES{TPX:1}cam1:WriteRaw", "0")
-        # time.sleep(0.5)
         # because we need to flush setting to actual server from IOC
         self.set_settings.set(1).wait()
         return super().unstage()
@@ -128,12 +115,12 @@ class Tpx3HDF(Device):
     hdf5_file_path = Cpt(EpicsSignalWithRBV, "FilePath", kind="omitted")
     hdf5_create_directory = Cpt(EpicsSignalWithRBV, "CreateDirectory", kind="omitted")
     
-    
     def stage(self):
          self.hdf5_create_directory.set(-4)
-         write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"
+         write_path_template = assets_path() + f"{self.parent.assets_name}/%Y/%m/%d/"
          write_path = datetime.now().strftime(write_path_template)
          self.hdf5_file_path.put(write_path)
+
 
 class TimePixDetector(SingleTriggerV33, AreaDetector):
     _default_configuration_attrs = None
@@ -143,8 +130,6 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
 
     files = Cpt(Tpx3Files, "cam1:")
     
-
-
     stats1 = Cpt(StatsPlugin_V34, "Stats1:")
     stats2 = Cpt(StatsPlugin_V34, "Stats2:")
     stats3 = Cpt(StatsPlugin_V34, "Stats3:")
@@ -159,13 +144,16 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
     ts2 = Cpt(TimeSeriesPlugin_V34, "Stats2:TS:")
     ts3 = Cpt(TimeSeriesPlugin_V34, "Stats3:TS:")
     ts4 = Cpt(TimeSeriesPlugin_V34, "Stats4:TS:")
-    
-    # def stage(self):
-    #     self.hdf5_create_directory.set(-4).wait()
-    #     write_path_template = assets_path() + "timepix-1/%Y/%m/%d/"
-    #     write_path = datetime.now().strftime(write_path_template)
-    #     self.hdf5_file_path.set(write_path).wait()
-    #     self.files.stage()
+
+    def __init__(self, *args, **kwargs):
+        self.assets_name = kwargs.pop("assets_name", "timepix")
+        super().__init__(*args, **kwargs)
+
+        for j in range(1, 5):
+            stat = getattr(self, f'stats{j}')
+            stat.kind = 'normal'
+            stat.total.kind = 'hinted'
+            stat.ts_total.kind = 'normal'
 
     def trigger(self):
         self.files.update_file_template()
@@ -191,15 +179,13 @@ class TimePixDetector(SingleTriggerV33, AreaDetector):
         yield from self.set_num_images(num_frames)      
 
 
-tpx3_1 = TimePixDetector("XF:11ID1-ES{TPX:1}", name="tpx3_1")
-print("Reloaded tpx3!")
-
-for j in range(1, 5):
-    stat = getattr(tpx3_1, f'stats{j}')
-    stat.kind = 'normal'
-    stat.total.kind = 'hinted'
-    stat.ts_total.kind = 'normal'
-
-    
+tpx3_1 = TimePixDetector("XF:11ID1-ES{TPX:1}", name="tpx3_1", assets_name="timepix-1")
+print("Reloaded tpx3_1!")
 for j in [1, 2, 3, 4]:
     getattr(tpx3_1, f'stats{j}').nd_array_port.set(f'ROI{j}')
+
+
+tpx3_2 = TimePixDetector("XF:11ID1-ES{TPX:2}", name="tpx3_2", assets_name="timepix-2")
+print("Reloaded tpx3_2!")
+for j in [1, 2, 3, 4]:
+    getattr(tpx3_2, f'stats{j}').nd_array_port.set(f'ROI{j}')
