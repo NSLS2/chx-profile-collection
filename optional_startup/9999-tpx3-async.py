@@ -435,6 +435,7 @@ async def set_mode(self: Tpx3Detector, mode_name: Tpx3Modes):
     await self.driver.prv_filepath.set("http://localhost")
     await self.driver.prv_write_enable.set(True)
     await self.driver.raw_write_enable.set(False)
+    await self.driver.raw_split_strat.set(SplitStrategy.FRAME)
     await self.driver.raw1_write_enable.set(False)
     await self.driver.img_write_enable.set(False)
     await self.driver.img1_write_enable.set(False)
