@@ -3,8 +3,7 @@ import nslsii
 import time
 
 from bluesky import RunEngine
-from bluesky.callbacks.buffer import BufferingWrapper
-from bluesky_tiled_plugins import TiledInserter
+from bluesky_tiled_plugins import BufferingWrapper, TiledInserter
 from redis_json_dict import RedisJSONDict
 from tiled.client import from_profile
 from ophyd.signal import EpicsSignalBase
