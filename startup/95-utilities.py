@@ -482,6 +482,8 @@ def ps(uid='-1',det='default',suffix='default',shift=.5,logplot='off',figure_num
     #from lmfit import minimize, Parameters, Parameter, report_fit
     #from scipy.special import erf
 
+    flush_tiled()  # wait for buffered documents to reach Tiled
+
     # get the scan information:
     if uid == '-1':
         uid=-1
@@ -987,10 +989,11 @@ def get_ID_calibration_dan(gapstart,gapstop,gapstep=.2,gapoff=0):
         yield from bp.abs_set(ivu_gap,i)
         print('hurray, made it up to here!')
         print('about to collect data')
-        yield from ascan(dcm.b, float(B_guess-.4), float(B_guess+.4), 60,
-                         md={'plan_name': 'ID_calibration',
-                             'mirror_stripe': stripe})
-        header = db[-1]					#retrive the data (first data point is often "wrong", so don't use
+        uid = yield from ascan(dcm.b, float(B_guess-.4), float(B_guess+.4), 60,
+                               md={'plan_name': 'ID_calibration',
+                                   'mirror_stripe': stripe})
+        flush_tiled()  # wait for buffered documents to reach Tiled
+        header = db[uid]				#retrive the data (first data point is often "wrong", so don't use
         data = get_table(header)
         B = data.dcm_b[2:]
         intdat = data.xray_eye1_stats1_total[2:]
@@ -1106,8 +1109,9 @@ def get_ID_calibration(gapstart,gapstop,gapstep=.2,gapoff=0):
         mov(ivu_gap,i)
         print('hurray, made it up to here!')
         print('about to collect data')
-        RE(ascan(dcm.b, float(B_guess-.4), float(B_guess+.4), 60))
-        header = db[-1]					#retrive the data (first data point is often "wrong", so don't use
+        uid, = RE(ascan(dcm.b, float(B_guess-.4), float(B_guess+.4), 60))
+        flush_tiled()  # wait for buffered documents to reach Tiled
+        header = db[uid]				#retrive the data (first data point is often "wrong", so don't use
         data = get_table(header)
         B = data.dcm_b[2:]
         intdat = data.xray_eye1_stats1_total[2:]
@@ -1127,7 +1131,7 @@ def get_ID_calibration(gapstart,gapstop,gapstep=.2,gapoff=0):
             realgap.append(caget('SR:C11-ID:G1{IVU20:1-LEnc}Gap'))
 #   # append data file by i, 1 & xf.get_EBragg(xtal,-coeff/5.0):
             print('passed the Gaussian trial fit, will use ps now to write data')
-            ps()  #this should always work
+            ps(uid=uid)  #this should always work
             Bvalue = ps.cen
             E1.append(xf.get_EBragg(xtal,-Bvalue)/5.0)
             center.append(Bvalue)
