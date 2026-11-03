@@ -117,6 +117,11 @@ def test_beam_checks():
             print('newspot()')
             check_current_beam(bpm_int_threshold=-1,wait_for_beam=True)
             print('series(expt=.1,imnum=200,....)')
+            # NOTE: when the series() call above is armed, take the uid from its
+            # return value instead of reading the latest run back from Tiled:
+            #     uid = series(expt=.1, imnum=200, ..., return_uid=True)
+            # Documents are buffered, so Tiled's view may lag behind Bluesky.
+            flush_tiled()  # wait for buffered documents to reach Tiled
             waiting_for_data = check_past_data(db[-1].start['uid'],bpm_int_threshold=-1,fraction=.05,verbose=True)
         print('\n\n\n next temperature! \n\n')
 

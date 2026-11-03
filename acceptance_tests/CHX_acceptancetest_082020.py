@@ -9,15 +9,17 @@ eiger1m_single.cam.num_images.value = 1
 eiger1m_single.cam.acquire_time.value = 1  
 eiger1m_single.cam.acquire_period.value = 1  
 
-RE(count([eiger1m_single]),Measurement='Deployment test')
+uid, = RE(count([eiger1m_single]),Measurement='Deployment test')
 
-img = get_images(db[-1], 'eiger1m_single_image');
+flush_tiled()  # wait for buffered documents to reach Tiled
+img = get_images(db[uid], 'eiger1m_single_image');
 print('showing the first image');
 plt.imshow( img[0][0] )
 
-series(det='eiger1m',expt=0.1,imnum=5)
+uid = series(det='eiger1m',expt=0.1,imnum=5,return_uid=True)
 
-img = get_images(db[-1], 'eiger1m_single_image');
+flush_tiled()  # wait for buffered documents to reach Tiled
+img = get_images(db[uid], 'eiger1m_single_image');
 print('showing the first image');
 plt.imshow( img[0][0] )
 
@@ -27,15 +29,17 @@ eiger4m_single.cam.num_images.value = 1
 eiger4m_single.cam.acquire_time.value = 1  
 eiger4m_single.cam.acquire_period.value = 1  
 
-RE(count([eiger4m_single]),Measurement='Deployment test')
+uid, = RE(count([eiger4m_single]),Measurement='Deployment test')
 
-img = get_images(db[-1], 'eiger4m_single_image');
+flush_tiled()  # wait for buffered documents to reach Tiled
+img = get_images(db[uid], 'eiger4m_single_image');
 print('showing the first image');
 plt.imshow( img[0][0] )
 
-series(det='eiger4m',expt=0.1,imnum=5)
+uid = series(det='eiger4m',expt=0.1,imnum=5,return_uid=True)
 
-img = get_images(db[-1], 'eiger4m_single_image');
+flush_tiled()  # wait for buffered documents to reach Tiled
+img = get_images(db[uid], 'eiger4m_single_image');
 print('showing the first image');
 plt.imshow( img[0][0] )
 
@@ -46,15 +50,17 @@ eiger500k_single.cam.num_images.value = 1
 eiger500k_single.cam.acquire_time.value = 1  
 eiger500k_single.cam.acquire_period.value = 1  
 
-RE(count([eiger500k_single]),Measurement='Deployment test')
+uid, = RE(count([eiger500k_single]),Measurement='Deployment test')
 
-img = get_images(db[-1], 'eiger500K_single_image');
+flush_tiled()  # wait for buffered documents to reach Tiled
+img = get_images(db[uid], 'eiger500K_single_image');
 print('showing the first image');
 plt.imshow( img[0][0] )
 
-series(det='eiger4m',expt=0.1,imnum=5)
+uid = series(det='eiger4m',expt=0.1,imnum=5,return_uid=True)
 
-img = get_images(db[-1], 'eiger4m_single_image');
+flush_tiled()  # wait for buffered documents to reach Tiled
+img = get_images(db[uid], 'eiger4m_single_image');
 print('showing the first image');
 plt.imshow( img[0][0] )
 
@@ -70,8 +76,9 @@ RE(rel_scan([xray_eye3], diff.xh, -.1, .1, 3))
 RE(rel_scan([xray_eye3], gsl.xc, -.1, .1, 3))
 
 print('A scan with the xray_eye3_writing detector')
-RE(rel_scan([xray_eye3_writing], diff.xh, -.1, .1, 3))
+uid, = RE(rel_scan([xray_eye3_writing], diff.xh, -.1, .1, 3))
 
-img = get_images(db[-1], 'xray_eye3_image')
+flush_tiled()  # wait for buffered documents to reach Tiled
+img = get_images(db[uid], 'xray_eye3_image')
 print('timestamp issue needs to be fixed...')
 #plt.imshow( img[0] )

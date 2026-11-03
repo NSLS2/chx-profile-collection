@@ -183,9 +183,10 @@ def refl_scan(incident_angle):
 	det=eiger1m_single
 	inner = cycler(diff.phh,-1*incident_angle)+cycler(diff.gam,-2*incident_angle)
 	plan = bp.scan_nd([det],inner)
-	RE(plan, [LiveTable([diff.phh,diff.gam,det]),LivePlot(x='diff_phi',y=det.name+"_stats1_total",fig = plt.figure())])
+	uid, = RE(plan, [LiveTable([diff.phh,diff.gam,det]),LivePlot(x='diff_phi',y=det.name+"_stats1_total",fig = plt.figure())])
 	### Live plot su$$$s!!! -> plot after the fact...
-	dat=get_table(db[-1])
+	flush_tiled()  # wait for buffered documents to reach Tiled
+	dat=get_table(db[uid])
 	plt.figure(97)
 	plt.semilogy(dat.diff_phh,dat.eiger1m_single_stats1_total)
 

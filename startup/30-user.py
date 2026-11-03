@@ -81,6 +81,7 @@ def get_beam_center_update( uid = -1, threshold = 200  ):
         None
     
     '''
+    flush_tiled()  # wait for buffered documents to reach Tiled
     hdr = tiled_reading_client[uid]
     keys = [k for k, v in hdr.descriptors[0]['data_keys'].items()     if 'external' in v]
     det = keys[0]    
@@ -1213,16 +1214,18 @@ def series_old(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,c
         print('Use XBPM to monitor beam intensity.')
 
     #RE(count([detector]),Measurement=comment)  ### ACQUISITION
+    # take the uid directly from RE's return value: Tiled's view may lag behind
+    # Bluesky because the documents are buffered, so do not read it back here.
     if PV_trigger:
       dets = detlist     
-      RE(wait_for_pv(dets,trigger_PV,feedback_on=feedback_on,md=RE.md),Measurement=comment)
+      uid_add, = RE(wait_for_pv(dets,trigger_PV,feedback_on=feedback_on,md=RE.md),Measurement=comment)
     elif position_trigger:
       dets = detlist     
-      RE(wait_for_motor(dets, position_trigger['motor'], position_trigger['target'], position_trigger['threshold'],start_move=position_trigger['start_move'], feedback_on=feedback_on, md=RE.md),Measurement=comment) 
+      uid_add, = RE(wait_for_motor(dets, position_trigger['motor'], position_trigger['target'], position_trigger['threshold'],start_move=position_trigger['start_move'], feedback_on=feedback_on, md=RE.md),Measurement=comment) 
     else:
       if feedback_on:
         RE(prep_series_feedback())
-      RE(count(detlist),Measurement=comment)  ### testing camera images taken simultaneously
+      uid_add, = RE(count(detlist),Measurement=comment)  ### testing camera images taken simultaneously
     # setting image number and period back for OAV camera:
     if OAV_mode != 'none':      ####! OAV !!!!!
         caput('XF:11IDB-BI{Cam:10}cam1:NumImages',org_ni)
@@ -1230,7 +1233,6 @@ def series_old(det='eiger4m',shutter_mode='single',expt=.1,acqp='auto',imnum=5,c
     ####### add acquired uid to database list for automatic compression #########
     if auto_compression:
         try:
-            uid_add=tiled_reading_client[-1]['start']['uid']
             uid_list=data_acquisition_collection.find_one({'_id':'general_list'})['uid_list']
             uid_list.append(uid_add)
             data_acquisition_collection.update_one({'_id': 'general_list'},{'$set':{'uid_list' : uid_list}})
