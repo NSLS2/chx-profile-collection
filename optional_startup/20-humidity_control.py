@@ -75,22 +75,65 @@ def setup_rh_pv(sensor='humidity_generator',voltage_supply=5):
 
 def setup_rh_pid():
     # this sets up the dry gas input and insures value is 0-100 [%]
-    caput('XF:11ID-CT{ES:1}ai1.DESC','dry GN2 [0-100%]')
+    # current config: 
+    # - set dry gas flow (wet will be controlled by PID): ai:9 (uses calc records Calc9 & Calc8 to ensure [0-100]% and calcuate the output voltage on the moxa AO)
+    # - set the analog input ai:10 as target value for relative humidity and use Calc7 to ensure [0-100]% and sets it as input value for Pid:01
+    # - setup Pid:01
+    # - display PID output wet flow [%] as ao:2
+    caput('XF:11ID-CT{ES:1}ai9.DESC','dry GN2 [0-100%]')
     caput('XF:11ID-CT{}DB:1userCalc9.SCAN',2)
-    caput('XF:11ID-CT{}DB:1userCalc9.INAN','XF:11ID-CT{ES:1}ai1')
+    caput('XF:11ID-CT{}DB:1userCalc9.INAN','XF:11ID-CT{ES:1}ai9')
     caput('XF:11ID-CT{}DB:1userCalc9.CALC','min(max(A,0),100)')
-    caput('XF:11ID-CT{}DB:1userCalc9.OUTN','XF:11ID-CT{ES:1}ai1')
+    caput('XF:11ID-CT{}DB:1userCalc9.OUTN','XF:11ID-CT{ES:1}ai9')
     # this calulates the output voltage corresponding to the requested dry gas flow and set the PLC output voltage
     caput('XF:11ID-CT{}DB:1userCalc8.SCAN',2)
-    caput('XF:11ID-CT{}DB:1userCalc8.INAN','XF:11ID-CT{ES:1}ai1')
+    caput('XF:11ID-CT{}DB:1userCalc8.INAN','XF:11ID-CT{ES:1}ai9')
     caput('XF:11ID-CT{}DB:1userCalc8.CALC','A*.05')
     caput('XF:11ID-CT{}DB:1userCalc8.OUTN',pv_dry_flow+'-SP')
     # this sets up the RH setpoint and makes sure it' in the range 0-100%
-    caput('XF:11ID-CT{ES:1}ai2.DESC','RH [0-100%] SETPOINT')
+    caput('XF:11ID-CT{ES:1}ai10.DESC','RH [0-100%] SETPOINT')
     caput('XF:11ID-CT{}DB:1userCalc7.SCAN',2)
-    caput('XF:11ID-CT{}DB:1userCalc7.INAN','XF:11ID-CT{ES:1}ai2')
-    caput('XF:11ID-CT{}DB:1userCalc7.OUTN','XF:11ID-CT{ES:1}ai2')
+    caput('XF:11ID-CT{}DB:1userCalc7.INAN','XF:11ID-CT{ES:1}ai10')
+    caput('XF:11ID-CT{}DB:1userCalc7.OUTN','XF:11ID-CT{ES:1}ai10')
     caput('XF:11ID-CT{}DB:1userCalc7.CALC','min(max(A,0),100)')
+    # setup Pid:01
+    caput('XF:11IDB-CT{FbPid:01}PID:in.INAN','XF:11ID-CT{ES:1}ai10')
+    caput('XF:11IDB-CT{FbPid:01}PID.SCAN',6) # set time constant to 1s
+    #     input calculation of PID record [EPID feedback input]
+    caput('XF:11IDB-CT{FbPid:01}PID:in.INAN','XF:11ID-CT{ES:1}ao1') # requested RH in ao:1 as RB for PID
+    caput('XF:11IDB-CT{FbPid:01}PID:in.CALC','A')
+    caput('XF:11IDB-CT{FbPid:01}PID:in.OOPT',0) # update 'Every Time'
+    caput(''XF:11IDB-CT{FbPid:01}PID:in.OUTN,'XF:11IDB-CT{FbPid:01}PID.ERR')
+    #      EPID output
+    caput('XF:11IDB-CT{FbPid:01}PID.KP',.3)
+    caput('XF:11IDB-CT{FbPid:01}PID.KI',.2)
+    caput('XF:11IDB-CT{FbPid:01}PID.KD',0)
+    caput('XF:11IDB-CT{FbPid:01}PID.FMOD',0) #mode: PID
+    caput('XF:11IDB-CT{FbPid:01}PID.DRVL',-100)
+    caput('XF:11IDB-CT{FbPid:01}PID.DRVH',100)
+    caput('XF:11IDB-CT{FbPid:01}PID:out.INAN','XF:11IDB-CT{FbPid:01}PID:obuf.VAL')
+    caput('XF:11IDB-CT{FbPid:01}PID:out.CALC','5-ABS(A/20)')
+    caput('XF:11IDB-CT{FbPid:01}PID:out.OOPT',0)
+    caput('XF:11IDB-CT{FbPid:01}PID:out.OUTN',pv_wet_flow+'-SP') #
+    caput('XF:11IDB-CT{FbPid:01}PID:on',1)
+    # relay wet flow [%] to ao:2 (just to show the user were the value is/ is it close to 0/100%?)
+    caput
+    caput('XF:11ID-CT{}DB:1userCalc6.INAN',pv_wet_flow+'-RB')
+    caput('XF:11ID-CT{}DB:1userCalc6.SCAN',3) # update every 10s 
+    caput('XF:11ID-CT{}DB:1userCalc6.CALC','A*20')
+    caput('XF:11ID-CT{}DB:1userCalc6.OOPT',0)
+    caput('XF:11ID-CT{}DB:1userCalc6.OUTN','XF:11ID-CT{ES:1}ao2')
+    caput('XF:11ID-CT{ES:1}ao2.DESC','current wet flow [%]')
+    
+    
+
+
+
+
+
+
+
+
 
 
 

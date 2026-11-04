@@ -1,0 +1,568 @@
+>>> %run -i /nsls2/data2/chx/shared/config/bluesky/profile_collection/usermacros/fig.py
+>>> my_positions = snake_scan_positions(-40,130,10,-10,.6,sample_in_y,sample_out_y)
+>>> fgi_scan(positions= my_positions,num_frames=10,count_time=0.025)
+<coroutine object fgi_scan at 0x7f43e2e72260>
+>>> %run -i /nsls2/data2/chx/shared/config/bluesky/profile_collection/usermacros/fig.py
+>>> sample_in_y
+-0.4
+>>> my_positions = snake_scan_positions(-40,130,10,-10,.6,sample_in_y,sample_out_y)
+>>> fgi_scan(positions= my_positions,num_frames=10,count_time=0.025)
+<coroutine object fgi_scan at 0x7f43e2e727a0>
+>>> %run -i /nsls2/data2/chx/shared/config/bluesky/profile_collection/usermacros/fig.py
+>>> my_positions = snake_scan_positions(-40,130,10,-10,.6,sample_in_y,sample_out_y)
+>>> len(my_positions[0])*2.5/60/60
+13.41111111111111
+>>> fgi_scan(positions= my_positions,num_frames=10,count_time=0.025)
+>>> RE.abort()
+('4a98fb13-122a-43a4-a87d-cd4e2135773b',)
+>>> fgi_scan(positions= my_positions,num_frames=10,count_time=0.025)
+>>> RE.abort(
+... )
+...
+('b80439b2-f872-4724-91a5-b09b96aa1145',)
+>>> fgi_scan(positions= my_positions,num_frames=10,count_time=0.025)
+>>> RE.abort()
+('716afccf-47cc-41a0-aad9-100a7645f74b',)
+>>> fgi_scan(positions= my_positions,num_frames=10,count_time=0.025)
+>>> RE.abort()
+('4d6d9b0d-e44a-4fa4-a369-b495065614c1',)
+>>> fgi_scan(positions= my_positions,num_frames=1,count_time=0.025)
+>>> RE.abort()
+('540f5f52-a0dd-4672-9616-cb5f2fde2ab5',)
+>>> fgi_scan(positions= my_positions,num_frames=1,count_time=0.025)
+>>> fgi_scan(positions= my_positions,num_frames=1,count_time=0.025); foe_sh.close(); foe_sh.close()
+>>> RE.abort()
+('e2cba321-45f1-4895-956f-e35e5f7b27fa',)
+>>> fgi_scan(positions= my_positions,num_frames=1,count_time=0.025); foe_sh.close(); foe_sh.close()
+>>> RE(count([xray_eye3]))
+('d21bf813-937a-4737-ab09-be540ebc5e80',)
+>>> sa
+>>> sample_in_y
+-0.4
+>>> sample_in_y = -8.4
+>>> sample_out_y = sample_in_y + 3.5
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> sample_out_y = -10.9
+>>> sample_in_y = -10.9 + 3.5
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> sample_in_y = -10.9 + 3.4
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> sample_in_y = -10.9 + 3.35
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> sample_in_y = -7.54
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> sample_in_y = -7.62
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> RE(count([xray_eye3]))
+('f3bbff42-881b-4755-90e4-5f90670b795e',)
+>>> my_positions = snake_scan_positions(-40,130,9.8,-10,1.2,sample_in_y,sample_out_y)
+>>> len(my_positions[0])
+4828
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> det = [xray_eye3_writing]
+>>> RE(count(det))
+('5890e554-5a6a-4b1c-9629-85f03e9d39b8',)
+>>> my_positions = snake_scan_positions(-40,130,10,-10,1.2,sample_in_y,sample_out_y)
+>>> len(my_positions[0])
+4828
+>>> my_positions = snake_scan_positions(-40,130,9.8,-10,1.2,sample_in_y,sample_out_y)
+>>> len(my_positions[0])
+4828
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> RE.abort()
+('d66194b9-7b4b-4152-a3a3-05951bb82c76',)
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> sample_in_y = -8.06
+>>> RE(mv(gonzo.y,sample_in_y-3.4))
+>>> sample_out_y = -11.42
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> RE(mv(gonzo.y,sample_out_y))
+>>> sample_out_y = -11.35
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> my_positions = snake_scan_positions(-40,130,9.8,-10,0.9,sample_in_y,sample_out_y)
+>>> len(my_positions[0])
+8316
+>>> len(my_positions[0])*2.5/60/60
+5.775
+>>> my_positions = snake_scan_positions(-40,130,9.8,-10,0.6,sample_in_y,sample_out_y)
+>>> len(my_positions[0])*2.5/60/60
+13.41111111111111
+>>> my_positions = snake_scan_positions(-40,130,9.8,-10,0.8,sample_in_y,sample_out_y)
+>>> len(my_positions[0])*2.5/60/60
+7.395833333333333
+>>> my_positions = snake_scan_positions(-40,130,9.8,-10,0.75,sample_in_y,sample_out_y)
+>>> my_positions = snake_scan_positions(-40,130,9.8,-10,0.8,sample_in_y,sample_out_y)
+>>> len(my_positions[0])*2.5/60/60
+7.395833333333333
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> RE.halt()
+('c4f9e9f6-c758-41e4-af3b-faef244911d3',)
+>>> sample_in_y = -8.082
+>>> my_positions = snake_scan_positions(-40,130,9.8,-10,0.8,sample_in_y,sample_out_y)
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> RE.abort()
+('d0665e80-ba42-47af-a417-539cd4fafcbe',)
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> echo "$sample_out_y"
+>>> echo $sample_out_y
+>>> echo sample_out_y
+>>> $sample_out_y
+>>> sample_out_y = -11.7
+>>> sample_in_y = -8.4
+>>> my_positions = snake_scan_positions(-40,130,10,-10,1.2,sample_in_y,sample_out_y)
+>>> my_positions
+array([[-40. , -40. , -38.8, ..., 128. , 129.2, 129.2],
+       [ 10. ,  10. ,  10. , ...,  -9.2,  -9.2,  -9.2],
+       [ -8.4, -11.7, -11.7, ..., -11.7, -11.7,  -8.4]], shape=(3, 4828))
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> RE.abort()
+('1966b638-8e12-445a-a322-334b8b7dbebe',)
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.065); foe_sh.close(); foe_sh.close()
+>>> RE.abort()
+('1ef99b6d-2674-4b6d-bbaa-869c7ecf8868',)
+>>> fgi_scan(positions= my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> y_sample_in
+>>> sample_in_y
+-8.4
+>>> sample_in_y = -5.16
+>>> -8.4 - -5.16
+-3.24
+>>> sample_out_y
+-11.7
+>>> sample_out_y + 3.24
+-8.459999999999999
+>>> sample_out_y = -8.46
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> sample_out_y = -8.4
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> sample_in_y = -4.98
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> my_positions = snake_scan_positions(-40,130,10,-10,1.2,sample_in_y,sample_out_y)
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> fgi_scan(positions=my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> fgi_scan(positions=my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close()
+>>> det
+[StandardProsilicaWithTIFFV33(prefix='XF:11IDB-BI{Cam:08}', name='xray_eye3', read_attrs=['stats1', 'stats1.total', 'stats2', 'stats2.total', 'stats3', 'stats3.total', 'stats4', 'stats4.total', 'stats5', 'stats5.total', 'tiff'], configuration_attrs=['cam', 'cam.acquire_period', 'cam.acquire_time', 'cam.image_mode', 'cam.manufacturer', 'cam.model', 'cam.num_exposures', 'cam.num_images', 'cam.trigger_mode', 'stats1', 'stats1.bgd_width', 'stats1.centroid_threshold', 'stats1.compute_centroid', 'stats1.compute_histogram', 'stats1.compute_profiles', 'stats1.compute_statistics', 'stats1.hist_max', 'stats1.hist_min', 'stats1.hist_size', 'stats1.profile_cursor', 'stats1.profile_size', 'stats1.ts_num_points', 'stats2', 'stats2.bgd_width', 'stats2.centroid_threshold', 'stats2.compute_centroid', 'stats2.compute_histogram', 'stats2.compute_profiles', 'stats2.compute_statistics', 'stats2.hist_max', 'stats2.hist_min', 'stats2.hist_size', 'stats2.profile_cursor', 'stats2.profile_size', 'stats2.ts_num_points', 'stats3', 'stats3.bgd_width', 'stats3.centroid_threshold', 'stats3.compute_centroid', 'stats3.compute_histogram', 'stats3.compute_profiles', 'stats3.compute_statistics', 'stats3.hist_max', 'stats3.hist_min', 'stats3.hist_size', 'stats3.profile_cursor', 'stats3.profile_size', 'stats3.ts_num_points', 'stats4', 'stats4.bgd_width', 'stats4.centroid_threshold', 'stats4.compute_centroid', 'stats4.compute_histogram', 'stats4.compute_profiles', 'stats4.compute_statistics', 'stats4.hist_max', 'stats4.hist_min', 'stats4.hist_size', 'stats4.profile_cursor', 'stats4.profile_size', 'stats4.ts_num_points', 'stats5', 'stats5.bgd_width', 'stats5.centroid_threshold', 'stats5.compute_centroid', 'stats5.compute_histogram', 'stats5.compute_profiles', 'stats5.compute_statistics', 'stats5.hist_max', 'stats5.hist_min', 'stats5.hist_size', 'stats5.profile_cursor', 'stats5.profile_size', 'stats5.ts_num_points', 'tiff'])]
+>>> RE(count(det))
+('f837cc24-c71d-4e32-8be3-a4ab4bfb3b0b',)
+>>> my_positions = snake_scan_positions(-40,130,9.5,-10,0.8,sample_in_y,sample_out_y)
+>>> fgi_scan(positions=my_positions,num_frames=5,count_time=0.035); foe_sh.close(); foe_sh.close(); hdm_goto_stripe(stripe='Si'); hdm_goto_stripe(stripe='Si'); hdm_goto_stripe(stripe='Si'); move_E(9.65);
+>>> hdm_check_stripe()
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> det = [elm]
+>>> RE(dscan(det,dcm.p,-0.002,0.002,50))
+('4c073f8b-26f3-43ff-9eda-d4835773b1b3',)
+>>> RE(dscan(det,dcm.p,-0.002,0.002,50))
+('6ba91536-d145-4809-be1f-4e2c17937f02',)
+>>> ps(-2)
+>>> RE(mv(dcm.p,ps.cen))
+()
+>>> RE(dscan(det,ivu_gap,-50,50,40))
+('46d61961-7dcb-4ba3-87d6-01c4b9190c6a',)
+>>> ps()
+>>> RE(mv(ivu_gap,ps.peak))
+()
+>>> RE(dscan(det,mbs.xc,-1,1,50))
+>>> RE.abort()
+('c019d077-33d9-4083-bc14-c82886582a70',)
+>>> RE(dscan(det,mbs.xc,-1,1,50))
+('80380611-b9a9-45f2-b1dd-b8c22f5f586c',)
+>>> ps()
+>>> RE(dscan(det,mbs.yc,-1.5,1.5,50))
+('bdce2a2a-77ef-495b-bf74-337ec94e763a',)
+>>> RE(dscan(det,mbs.yc,-1.5,1.5,50))
+('b523bca9-a9c1-49ba-ab91-3d4bbbee6592',)
+>>> ps()
+>>> RE(dscan(det,mbs.yc,-1.5,1.5,76))
+('39e88013-803c-4c24-949f-2284568b63b3',)
+>>> RE(dscan(det,mbs.xc,-1,1,50))
+('64f69fca-cdc2-4e5d-ab63-222dfb50df09',)
+>>> ps()
+>>> dbpm_offsets()
+>>> goto_beamline_pos()
+>>> goto_beamline_pos()
+>>> att2.set_T(1e-5)
+>>> att2.set_T(1)
+>>> att2.set_T(1e-6)
+>>> att2.set_T(1)
+>>> fast_sh.x
+>>> fast_sh
+TwoPVShutter(read_pv='XF:11IDB-ES{Zebra}:OUT1_TTL:STA', name='fast_sh', timestamp=1791603175.0834234, auto_monitor=False, string=False, write_pv='XF:11IDB-ES{Zebra}:SOFT_IN:B0', limits=False, put_complete=False)
+>>> psh.x
+>>> psh
+>>> piezo
+>>> fast_sh_x = Cpt(EpicsMotor, 'XF:11IDB-OP{PSH:1-Ax:X}Mtr', name='fast_sh_x')
+>>> RE(mvr(fast_sh_x,-0.1))
+>>> EpicsMotor
+ophyd.epics_motor.EpicsMotor
+>>> Cpt?
+>>> fast_sh_x = Cpt(EpicsMotor, 'XF:11IDB-OP{PSH:1-Ax:X}Mtr', name='fast_sh_x')
+>>> RE(mvr(fast_sh_x,-0.1))
+>>> fast_sh_x = EpicsMotor('XF:11IDB-OP{PSH:1-Ax:X}Mtr', name='fast_sh_x')
+>>> RE(mvr(fast_sh_x,-0.1))
+()
+>>> RE(mvr(fast_sh_x,0.1))
+()
+>>> psh
+>>> psh_x
+>>> psh.x
+>>> att2.set_T(1e-6)
+>>> goto
+>>> goto_beamline_pos()
+>>> goto_beamline_pos()
+>>> det = [eiger4m_single]
+>>> RE(count(det))
+('474fcd6f-dda2-4de9-97d7-b4b61fdd9a5f',)
+>>> RE(count(det))
+('ea7aed02-a2d7-4a6b-96f0-6d98fbee2a13',)
+>>> RE(count(det))
+('c03e19d4-984f-4faa-ae6c-4dd2bebb0e2e',)
+>>> RE(count(det))
+('266385cf-628f-4cca-9db6-1856ada53385',)
+>>> update_beam_position_dict?
+>>> update_beam_position_dict('eiger4m')
+>>> goto_beamline_pos()
+>>> att2.set_T(1)
+>>> RE.md
+{'user_group': [], 'username': 'jgoodrich', 'beam_position_dict': {'eiger4m': {'beam_center_x': 1167.0, 'beam_center_y': 1231.0, 'det_x': 119.7728, 'det_y': -133.12815}, 'eiger500k': {'beam_center_x': 534.0, 'beam_center_y': 10.0, 'det_x': -32.34875, 'det_y': -145.0704}}, 'cycle': '2026-3', 'scan_id': 224947, 'data_session': 'pass-316251', 'tiled_access_tags': ['pass-316251'], 'proposal': {'proposal_id': '316251', 'title': 'X-ray Quantum Coherent Scattering: A New Method for Beam-Sensitive Materials', 'type': 'Partner User', 'pi_name': 'Andrei Fluerasu'}, 'versions': {'ophyd': '1.11.2', 'ophyd_async': '0.21.3', 'bluesky': '1.15.0', 'event_model': '1.24.0'}, 'sample': 'TSI', 'start_datetime': '2026-10-09T10:27:13.685456', 'auto_pipeline': 'XPCS_WAXS_2026_auto', 'owner': 'xf11id', 'OAV_resolution [um_pixel]': 'N.A.', 'beamline_id': 'CHX'}
+>>> RE.md['auto_pipeline'] = 'XPCS_auto'
+>>> RE.md['scat_geometry'] = 'saxs'
+>>> RE.md['sample'] = 'abrasive 0.05um'
+>>> det
+[EigerSingleTrigger_AD37_V2(prefix='XF:11IDB-ES{Det:Eig4M}', name='eiger4m_single', read_attrs=['file', 'stats1', 'stats1.total', 'stats2', 'stats2.total', 'stats3', 'stats3.total', 'stats4', 'stats4.total', 'stats5', 'stats5.total'], configuration_attrs=['cam', 'cam.acquire_period', 'cam.acquire_time', 'cam.num_images', 'file', 'beam_center_x', 'beam_center_y', 'wavelength', 'det_distance', 'threshold_energy', 'photon_energy', 'stats1', 'stats1.bgd_width', 'stats1.centroid_threshold', 'stats1.compute_centroid', 'stats1.compute_histogram', 'stats1.compute_profiles', 'stats1.compute_statistics', 'stats1.hist_max', 'stats1.hist_min', 'stats1.hist_size', 'stats1.profile_cursor', 'stats1.profile_size', 'stats1.ts_num_points', 'stats2', 'stats2.bgd_width', 'stats2.centroid_threshold', 'stats2.compute_centroid', 'stats2.compute_histogram', 'stats2.compute_profiles', 'stats2.compute_statistics', 'stats2.hist_max', 'stats2.hist_min', 'stats2.hist_size', 'stats2.profile_cursor', 'stats2.profile_size', 'stats2.ts_num_points', 'stats3', 'stats3.bgd_width', 'stats3.centroid_threshold', 'stats3.compute_centroid', 'stats3.compute_histogram', 'stats3.compute_profiles', 'stats3.compute_statistics', 'stats3.hist_max', 'stats3.hist_min', 'stats3.hist_size', 'stats3.profile_cursor', 'stats3.profile_size', 'stats3.ts_num_points', 'stats4', 'stats4.bgd_width', 'stats4.centroid_threshold', 'stats4.compute_centroid', 'stats4.compute_histogram', 'stats4.compute_profiles', 'stats4.compute_statistics', 'stats4.hist_max', 'stats4.hist_min', 'stats4.hist_size', 'stats4.profile_cursor', 'stats4.profile_size', 'stats4.ts_num_points', 'stats5', 'stats5.bgd_width', 'stats5.centroid_threshold', 'stats5.compute_centroid', 'stats5.compute_histogram', 'stats5.compute_profiles', 'stats5.compute_statistics', 'stats5.hist_max', 'stats5.hist_min', 'stats5.hist_size', 'stats5.profile_cursor', 'stats5.profile_size', 'stats5.ts_num_points'])]
+>>> RE(count(det))
+('20b4bf2d-881b-4128-83b9-3c738b968991',)
+>>> series(det='eiger1m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger1m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['user'] = 'pass-316251'
+>>> series(det='eiger1m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger1m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger1m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger1m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 0.3um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 1.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.abort()
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 3.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 5.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 9.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 12.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 15.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.abort()
+('e40acb56-abf0-4e68-8465-b7a5edffe01a',)
+>>> RE(count(det))
+('fa502118-0c3e-450c-92f7-ef17eae63933',)
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 20.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 30.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> RE.md['sample'] = 'abrasive 40.0um'
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> 1/750
+0.0013333333333333333
+>>> RE.md['sample'] = 'abrasive .05um'
+>>> series(det='eiger4m',expt=0.0014,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> series(det='eiger4m',expt=0.0014,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> det
+[EigerSingleTrigger_AD37_V2(prefix='XF:11IDB-ES{Det:Eig4M}', name='eiger4m_single', read_attrs=['file', 'stats1', 'stats1.total', 'stats2', 'stats2.total', 'stats3', 'stats3.total', 'stats4', 'stats4.total', 'stats5', 'stats5.total'], configuration_attrs=['cam', 'cam.acquire_period', 'cam.acquire_time', 'cam.num_images', 'file', 'beam_center_x', 'beam_center_y', 'wavelength', 'det_distance', 'threshold_energy', 'photon_energy', 'stats1', 'stats1.bgd_width', 'stats1.centroid_threshold', 'stats1.compute_centroid', 'stats1.compute_histogram', 'stats1.compute_profiles', 'stats1.compute_statistics', 'stats1.hist_max', 'stats1.hist_min', 'stats1.hist_size', 'stats1.profile_cursor', 'stats1.profile_size', 'stats1.ts_num_points', 'stats2', 'stats2.bgd_width', 'stats2.centroid_threshold', 'stats2.compute_centroid', 'stats2.compute_histogram', 'stats2.compute_profiles', 'stats2.compute_statistics', 'stats2.hist_max', 'stats2.hist_min', 'stats2.hist_size', 'stats2.profile_cursor', 'stats2.profile_size', 'stats2.ts_num_points', 'stats3', 'stats3.bgd_width', 'stats3.centroid_threshold', 'stats3.compute_centroid', 'stats3.compute_histogram', 'stats3.compute_profiles', 'stats3.compute_statistics', 'stats3.hist_max', 'stats3.hist_min', 'stats3.hist_size', 'stats3.profile_cursor', 'stats3.profile_size', 'stats3.ts_num_points', 'stats4', 'stats4.bgd_width', 'stats4.centroid_threshold', 'stats4.compute_centroid', 'stats4.compute_histogram', 'stats4.compute_profiles', 'stats4.compute_statistics', 'stats4.hist_max', 'stats4.hist_min', 'stats4.hist_size', 'stats4.profile_cursor', 'stats4.profile_size', 'stats4.ts_num_points', 'stats5', 'stats5.bgd_width', 'stats5.centroid_threshold', 'stats5.compute_centroid', 'stats5.compute_histogram', 'stats5.compute_profiles', 'stats5.compute_statistics', 'stats5.hist_max', 'stats5.hist_min', 'stats5.hist_size', 'stats5.profile_cursor', 'stats5.profile_size', 'stats5.ts_num_points'])]
+>>> RE(dscan(det,gonzo.x, -0.5, 0.5, 100))
+('2bfd29cf-5d45-4d58-9c68-9ae8b34f44fb',)
+>>> ps()
+>>> RE(mv(gonzo.x,ps.peak))
+()
+>>> RE(dscan(det,gonzo.x, -0.05, 0.05, 50))
+>>> RE.abort()
+('c4e18b76-20fd-4c7e-8453-97f9b0e33b39',)
+>>> RE(dscan(det,gonzo.x, -0.05, 0.05, 50))
+('70ba545e-9ea2-4980-bc8f-b7327a9e37d5',)
+>>> ps()
+>>> RE(mv(gonzo.x,-4.24502))
+()
+>>> RE(mvr(gonzo.x,-0.1))
+()
+>>> RE(mvr(gonzo.x,-0.1))
+()
+>>> RE(mvr(gonzo.x,0.1))
+()
+>>> RE(mvr(gonzo.x,0.1))
+()
+>>> RE(mvr(gonzo.x,-0.5))
+()
+>>> RE(mvr(gonzo.x,0.5))
+()
+>>> RE(mv(gonzo.y,sample_out_y))
+()
+>>> att2.get_T()
+1
+>>> att.get_T()
+np.float64(1.0)
+>>> RE(mv(gonzo.y,sample_in_y))
+()
+>>> RE(dscan(det,gonzo.y, -2, 2, 50))
+>>> RE.abort()
+('0022184e-13a8-4971-ae19-ac1718ac2e3f',)
+>>> RE(dscan(det,gonzo.y, -2, 2, 50))
+('5622866c-43fb-4131-8bb7-c9f6cf657c11',)
+>>> ps()
+>>> RE(mv(gonzo.y,-1.489152))
+()
+>>> RE(dscan(det,gonzo.x, -2, 2, 50))
+('33c2b3f6-1e73-44cb-aa20-c2b57950118a',)
+>>> ps()
+>>> (-3.991 + -1.862)/2
+-2.9265
+>>> RE(mv(gonzo.x,-2.9265))
+()
+>>> RE(dscan(det,gonzo.x, -1.5, 1.5, 150))
+('a3182aff-dfbe-4dcb-8e44-2e16c8c1aff7',)
+>>> ps()
+>>> RE(mv(gonzo.x,-2.7838))
+()
+>>> RE(dscan(det,gonzo.y, -1.5, 1.5, 150))
+('d6c743cc-b02e-4b84-a4b5-73505d9a460c',)
+>>> ps()
+>>> RE(dscan(det,gonzo.y, -1.7, -1.3, 100))
+>>> RE.abort()
+('0816e384-e622-49be-8db5-c6ee2763e166',)
+>>> RE(scan(det,gonzo.y, -1.7, -1.3, 100))
+('eb38dd69-886f-481f-ad73-16b9116fa3eb',)
+>>> ps()
+>>> RE(mv(gonzo.y,-1.52))
+()
+>>> RE(mv(gonzo.y,0.1))
+()
+>>> RE(mv(gonzo.y,-1.52))
+()
+>>> RE(mvr(gonzo.y,-0.1))
+()
+>>> RE(mvr(gonzo.y,0.1))
+()
+>>> RE(mvr(gonzo.y,0.1))
+()
+>>> RE(mvr(gonzo.x,0.1))
+()
+>>> RE(mvr(gonzo.x,-0.2))
+()
+>>> RE(mvr(gonzo.x,-0.1))
+()
+>>> RE(mvr(gonzo.x,-0.1))
+()
+>>> RE(mvr(gonzo.x,0.2))
+()
+>>> RE(mvr(gonzo.x,0.1))
+()
+>>> RE(mvr(gonzo.x,0.1))
+()
+>>> RE(mvr(gonzo.x,0.1))
+()
+>>> RE(mvr(gonzo.x,0.1))
+()
+>>> RE(mvr(gonzo.x,-0.3))
+()
+>>> RE(mvr(gonzo.x,0.01))
+()
+>>> RE(dscan(det,gonzo.x, -0.1, 0.1, 100))
+('cd507460-2a4f-454c-9421-f09a5285f06d',)
+>>> ps()
+>>> RE(mv(gonzo.x,ps.peak))
+()
+>>> RE(dscan(det,gonzo.y, -0.1, 0.1, 100))
+>>> RE.abort()
+('cb3005e6-37a5-4d8b-aa43-2dd97b7506fd',)
+>>> RE(dscan(det,gonzo.y, -0.1, 0.1, 100))
+('2483fc75-6c85-4743-b80c-d3a2aecd7424',)
+>>> ps()
+>>> RE(mv(gonzo.y,ps.peak))
+()
+>>> RE(dscan(det,gonzo.x, -0.1, 0.1, 100))
+('a55a07cb-f551-4340-adba-47ba4e44a455',)
+>>> ps()
+>>> RE(mv(gonzo.x, ps.peak))
+()
+>>> RE(mvr(gonzo.x, 0.1))
+()
+>>> RE(mvr(gonzo.x, -0.1))
+()
+>>> RE(mvr(gonzo.x, -0.1))
+()
+>>> RE(mvr(gonzo.x, +0.1))
+()
+>>> RE(dscan(det,gonzo.x, -0.1, 0.1, 50))
+>>> RE.abort()
+('5f1477ef-506e-46db-a974-45e84265a13b',)
+>>> RE(dscan(det,gonzo.x, -0.01, 0.01, 50))
+('e99bba23-e680-4fde-bb3d-4d627b26d954',)
+>>> ps()
+>>> RE(mv(gonzo.x, ps.peak))
+()
+>>> RE(mv(gonzo.x, ps.peak))
+()
+>>> RE(dscan(det,gonzo.y, -0.01, 0.01, 50))
+('b9e1b9f8-374d-4619-b2ce-1bb7e4403d44',)
+>>> RE(dscan(det,gonzo.y, -0.01, 0.01, 50))
+('a48f22b0-1de8-49ad-858d-1012eb3010c5',)
+>>> ps()
+>>> RE(mv(gonzo.y,ps.peak))
+()
+>>> RE(count(det))
+('92bfb281-9841-4d17-b2d9-9414e6e6e7a4',)
+>>> att2.set_T(0.2)
+>>> RE(count(det))
+('57b4ed18-3c78-45df-a0de-9bec0c6811f7',)
+>>> RE(mvr(gonzo.x, 0.1))
+()
+>>> RE(count(det))
+('8ba03b6c-8b99-4115-a7b0-3a5ffe04f42a',)
+>>> RE(mvr(gonzo.x, -0.1))
+()
+>>> RE(mvr(gonzo.y, 0.1))
+()
+>>> RE(count(det))
+('ffb5fd41-e386-40f5-ab23-d360e6a80770',)
+>>> RE(mvr(gonzo.y, -0.2))
+()
+>>> RE(count(det))
+('0ed5f4c8-6e3d-43e9-9bc3-3cb2e11540fd',)
+>>> RE(mvr(gonzo.x, 0.1))
+()
+>>> RE(count(det))
+('3df40ca7-6669-48c2-bfbb-312552711359',)
+>>> RE(mvr(gonzo.x, 0.1))
+()
+>>> RE(count(det))
+('97451532-a084-4f75-be08-3e7cb3f1ce0e',)
+>>> RE(mvr(gonzo.x, -0.3))
+()
+>>> RE(count(det))
+('482abe75-5322-4f98-ac87-04c2ed0cd461',)
+>>> RE(mvr(gonzo.y, -0.1))
+()
+>>> RE(count(det))
+('74731362-1c84-4c77-9391-45d0da0de4d8',)
+>>> RE(mvr(gonzo.x, 0.1))
+()
+>>> RE(count(det))
+('1823ce64-4ca2-4a8c-9793-df5f04e70d19',)
+>>> RE(mvr(gonzo.x, 0.1))
+()
+>>> RE(count(det))
+('19671499-084e-4cba-a49b-9d13ac8db2f8',)
+>>> RE(mvr(gonzo.x, -0.1))
+()
+>>> RE(mvr(gonzo.y, 0.2))
+()
+>>> RE(count(det))
+('53e1a9e1-8196-4c74-ab5b-168540dbfb13',)
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> RE.abort()
+('f6309141-2755-41e9-ae9b-c406ebd99044',)
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> RE(mv(diff.xv2,0))
+>>> RE(mv(diff.xv2,0))
+()
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> RE(mv(diff.xv2,40))
+()
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> RE(mv(diff.xv2,80))
+()
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> series(det='eiger4m',expt=0.1,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> series(det='eiger4m',expt=0.1,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> att2.set_T(1)
+>>> 0.5*(-5.37 - 2.02)
+-3.6950000000000003
+>>> 0.5*(-5.57-1.87)
+-3.72
+>>> RE(mv(gonzo.x,-3.72))
+()
+>>> RE(dscan(det,gonzo.x, -.5, .5, 50))
+('1d60351f-0e9d-4687-bf85-6da8b5fa12d1',)
+>>> ps()
+>>> RE(mv(gonzo.x,ps.cen))
+()
+>>> RE(count(det))
+('b45ea762-dc5e-47de-aadf-f12088223f6f',)
+>>> RE(mvr(gonzo.y, -3.5))
+()
+>>> series(det='eiger4m',expt=0.1,imnum=20,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> series(det='eiger4m',expt=0.01,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> series(det='eiger4m',expt=0.01,imnum=100,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT');
+>>> att2.get_T()
+1
+>>> series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT'); att2.set_T(0.2)
+>>> series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> att2.set_T(0.2*0.2)
+>>> series(det='eiger4m',expt=0.01,imnum=1000,feedback_on=True,auto_compression=True,comment='AUTO_COMMENT')
+>>> goto_beamline_pos_v2()
+>>> att2.set_T(1e-2)
+>>> att2.set_T(1e-4)
+>>> att2.set_T(5e-4)
+>>> att2.set_T(1e-3)
+>>> det = [tpx3_2]
+>>> %run -i /nsls2/data2/chx/shared/config/bluesky/profile_collection/9999-tpx3-async.py
+>>> %run -i /nsls2/data2/chx/shared/config/bluesky/profile_collection/optional_startup/9999-tpx3-async.py
+>>> tpx3_2
+Tpx3Detector(name="tpx3_2")
+>>> det = [tpx3_2]
+>>> RE(dscan(det,gonzo.x, -.5, .5, 50))
+('fbff5a82-5260-422e-9cd7-84604f2addcd',)
+>>> ps()
+>>> RE(dscan(det,gonzo.x, -.2, .2, 50))
+('0aa62f42-d9f5-4718-ab6f-5669f32a8f2d',)
+>>> ps()
+>>> RE(mv(gonzo.x,ps.peak))
+()
+>>> RE(dscan(det,gonzo.x, -.3, .3, 50))
+('d9a39a39-3ca4-4999-99e2-678c37e70307',)
+>>> ps()
+>>> ps(-2)
+>>> ps(-1)
+>>> att2.set_T(5e-3)
+>>> %history -o -p -f session_history.txt

@@ -6,6 +6,7 @@ try:
     trigger_signal_pv = 'XF:11ID-CT{M3}bi2' # trigger signal from printer setup
     caget(trigger_signal_pv)
     SAXS_done_pv='XF:11ID-CT{M3}bi3'
+
     caget(SAXS_done_pv)
     caput('XF:11ID-CT{M3}bi3.DESC','SAXS done')
     WAXS_done_pv='XF:11ID-CT{M3}bi4'
@@ -18,7 +19,7 @@ try:
 except:
     print('Failed defining PVs for status and trigger signals.')
 
-def wcount(detector_list=[pilatus800],imnum=[1],exposure_time=[1],acquire_period=['auto']):
+def wcount(detector_list=[pilatus800],imnum=[1],exposure_time=[1],acquire_period=['auto'],shutter_control=True):
     """
     wrapper for Pilatus800k count, add some detector specific metadata
     can set individual number of images, exposure time and acquire period for a list of detectors
@@ -36,7 +37,11 @@ def wcount(detector_list=[pilatus800],imnum=[1],exposure_time=[1],acquire_period
             RE.md['pil800k_exposure_time']=exposure_time[ii]
             RE.md['pil800k_acquire_period']=acquire_period[ii]
             RE.md['pil800k_imnum']=imnum[ii]
+    if shutter_control:
+        fast_sh.open()        
     yield from count(detector_list)
+    if shutter_control:
+        fast_sh.close()
     if detector == pilatus800:
         RE.md.pop('pil800k_exposure_time')
         RE.md.pop('pil800k_acquire_period')

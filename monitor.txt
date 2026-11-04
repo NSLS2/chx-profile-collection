@@ -1,0 +1,38 @@
+camonitor \
+XF:11IDB-BI{Cam:08}cam1:NumImages_RBV \
+XF:11IDB-BI{Cam:08}cam1:AcquireTime_RBV \
+XF:11IDB-BI{Cam:08}cam1:AcquirePeriod_RBV \
+XF:11IDB-BI{Cam:08}cam1:ArrayCounter_RBV \
+XF:11IDB-BI{Cam:08}cam1:Acquire_RBV \
+XF:11IDB-BI{Cam:08}cam1:PoolUsedBuffers \
+XF:11IDB-BI{Cam:08}cam1:ArrayRate_RBV \
+XF:11IDB-BI{Cam:08}HDF1:ArrayRate_RBV \
+XF:11IDB-BI{Cam:08}HDF1:ArrayCounter_RBV \
+XF:11IDB-BI{Cam:08}HDF1:NumCaptured_RBV \
+XF:11IDB-BI{Cam:08}HDF1:WriteStatus \
+XF:11IDB-BI{Cam:08}HDF1:WriteMessage \
+XF:11IDB-BI{Cam:08}HDF1:DroppedArrays_RBV \
+XF:11IDB-BI{Cam:08}HDF1:DroppedOutputArrays_RBV \
+XF:11IDB-BI{Cam:08}HDF1:QueueFree \
+XF:11IDB-BI{Cam:08}HDF1:ExecutionTime_RBV \
+XF:11IDB-BI{Cam:08}HDF1:PoolUsedBuffers \
+| tee -a xray_eye_vimba7.log
+
+
+camonitor \
+XF:11IDB-BI{Cam:08}cam1:NumImages_RBV \
+XF:11IDB-BI{Cam:08}cam1:AcquireTime_RBV \
+XF:11IDB-BI{Cam:08}cam1:AcquirePeriod_RBV \
+XF:11IDB-BI{Cam:08}cam1:ArrayCounter_RBV \
+XF:11IDB-BI{Cam:08}cam1:Acquire_RBV \
+XF:11IDB-BI{Cam:08}cam1:PoolUsedBuffers \
+XF:11IDB-BI{Cam:08}cam1:ArrayRate_RBV \
+XF:11IDB-BI{Cam:08}TIFF1:ArrayCounter_RBV \
+XF:11IDB-BI{Cam:08}TIFF1:NumCaptured_RBV \
+XF:11IDB-BI{Cam:08}TIFF1:WriteStatus \
+XF:11IDB-BI{Cam:08}TIFF1:WriteMessage \
+XF:11IDB-BI{Cam:08}TIFF1:DroppedArrays_RBV \
+XF:11IDB-BI{Cam:08}TIFF1:DroppedOutputArrays_RBV \
+XF:11IDB-BI{Cam:08}TIFF1:QueueFree \
+XF:11IDB-BI{Cam:08}TIFF1:ExecutionTime_RBV \
+| tee -a xray_eye_vimba_tiff.log
